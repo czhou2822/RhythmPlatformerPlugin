@@ -99,13 +99,21 @@ private:
 private:
 	
 	void UpdateCamaraLookAt();
+
 	void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime); // called everyframe and used for our gamelogic
+
 	FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+
 	FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+
 	void RawDataArrayToRawDrawArray(const TArray<float>& InputArray, int BucketSize);
+
 	void RawDrawArrayToDrawArray(const int Start, const int End, TArray<float>& InRawDrawArray);
+
 	void GetBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const;
+
 	void UpdateSnapLine();
+
 	void InitializeMyCompoundWidget();
 
 	/* Button Events   */
@@ -120,13 +128,6 @@ private:
 	FReply SaveLevel();
 	FReply RefreshRunningSpeed();
 
-	void HandlePlaybackPercentageOnHit(const USoundWave* PlayingSoundWave, const float PlaybackPercent);
-
-	UFUNCTION()
-	void HandleOnAudioFinishedNative(const class UAudioComponent*, const class USoundWave*, const float);
-
-	//UFUNCTION()
-	//void HandleOnMediaPlayerMediaOpened(FString OpenedUrl);
 
 public:
 	void UpperBorderSize()  ;
@@ -149,6 +150,7 @@ public:
 	TArray<float> WaveToRawDataArray(USoundWave* SoundWave);
 
 	//UFUNCTION()
-		void HandleOnAudioPlaybackPercent(const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
-		void HandleOnSliderChanged();
+	void HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
+
+	void HandleOnSliderChanged();
 };

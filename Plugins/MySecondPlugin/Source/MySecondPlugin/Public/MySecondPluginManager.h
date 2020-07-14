@@ -27,21 +27,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 		UAudioComponent* PluginAudioPlayer;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		USoundWave* GameAudio;
-
-
-
-
-	//UPROPERTY(EditAnywhere, Category = "Experimental")
-	//	UMediaPlayer* PluginMediaPlayer;
-
-	//UPROPERTY(EditAnywhere, Category = "Experimental")
-	//	UMediaSoundComponent* MediaSoundComp;
-
-	//UPROPERTY(EditAnywhere, Category = "Experimental")
-	//	UMediaSource* PluginMediaSource;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,8 +34,7 @@ protected:
 	UFUNCTION()
 	void HandleOnComponentActivated( UActorComponent* Component, bool bReset);
 
-	UFUNCTION()
-	void HandleOnPlaybackPercent(const USoundWave* PlayingWave, const float PlaybackPercent);
+
 
 	UFUNCTION()
 	void HandleOnAudioFinished();
@@ -62,21 +46,22 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-		void TestFunction();
+	void TestFunction();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float RunningSpeed;
+	float RunningSpeed;
 
 	UFUNCTION(BlueprintCallable)
-		void PlaySoundFunction(float Start = 0);
+	void PlaySoundFunction(float Start = 0);
 
 	UFUNCTION()
-		void HandleOnAudioFinishedNative(const class UAudioComponent* AudioComp, const class USoundWave* SoundWave, const float PlaybackPercent);
+	void HandleOnAudioFinishedNative(const class UAudioComponent* AudioComp, const class USoundWave* SoundWave, const float PlaybackPercent);
 
 	UFUNCTION(BlueprintCallable)
-		void ChangePlaybackSpeed(float rate);
+	void ChangePlaybackSpeed(float rate);
 
+	UFUNCTION()
+	void HandleOnPlaybackPercent(const USoundWave* PlayingSoundWave, const float PlaybackPercent);
 
-	USoundWave* GetAudio();
 
 };

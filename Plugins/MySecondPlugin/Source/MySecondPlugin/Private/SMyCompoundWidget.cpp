@@ -228,6 +228,8 @@ void SMyCompoundWidget::InitializeMyCompoundWidget()
 	MyIAssetViewport = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstActiveViewport();
 	CamaraStartLocation = MyEditorViewportClient->GetViewLocation();
 	CamaraStartLocation.X = 0;
+
+	
 	
 	SMyCompoundWidget::UpperBorderSize();
 	SMyCompoundWidget::ReloadWave();
@@ -250,13 +252,14 @@ FReply SMyCompoundWidget::ReloadWave()
 			//PluginManagerObject->PluginAudioPlayer->SetSound(PluginManagerObject->GameAudio);
 			MyAudioPlayer = PluginManagerObject->PluginAudioPlayer;
 
-
 			MyAudioPlayer->SetUISound(true);
 			MyAudioPlayer->Activate();
 			bIsManagerValid = true;
 			MyAudioPlayer->SetPaused(true);
 			MySoundWave = (USoundWave*)MyAudioPlayer->Sound;
-			//MyAudioPlayer->OnAudioPlaybackPercent.AddDynamic(this, &SMyCompoundWidget::HandleOnAudioPlaybackPercent);
+
+			MyAudioPlayer->OnAudioPlaybackPercentNative.AddSP(this, &SMyCompoundWidget::HandleOnAudioPlaybackPercentNative);
+
 //			PluginManagerObject->PluginAudioPlayer->OnAudioPlaybackPercentNative.AddDynamic(this, &SMyCompoundWidget::HandleOnAudioPlaybackPercent);
 //			WindowLength = (float) (NUMBER_OF_LINES_IN_WINDOW) / (float)RawDrawArray.Num() * (float)MySoundWave->Duration;
 			BPM = 60.f;
@@ -406,10 +409,6 @@ void SMyCompoundWidget::UpdateSnapLine()
 	SnapLine[1] = SnapLine[0] + FVector2D(0,3000);		
 }
 
-void SMyCompoundWidget::HandleOnAudioPlaybackPercent(const class USoundWave* PlayingSoundWave, const float PlaybackPercent)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Percentage: %s"), *FString::SanitizeFloat(PlaybackPercent));
-}
 
 int32 SMyCompoundWidget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyClippingRect, FSlateWindowElementList& OutDrawElements,	int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
@@ -512,9 +511,9 @@ FReply SMyCompoundWidget::TestFunction()
 	return FReply::Handled();
 }
 
-void SMyCompoundWidget::HandleOnAudioFinishedNative(const class UAudioComponent* AudioComp, const class USoundWave* SoundWave, const float PlaybackPercent)
+void SMyCompoundWidget::HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnMusicPlayback: %s. "), *FString::SanitizeFloat(PlaybackPercent));
+	UE_LOG(LogTemp, Warning, TEXT("PluginPlayback: %s. Percent: %s"), *PlayingSoundWave->GetName(), *FString::SanitizeFloat(PlaybackPercent));
 }
 
 FReply SMyCompoundWidget::LoadLevel()
@@ -575,11 +574,6 @@ FReply SMyCompoundWidget::RefreshRunningSpeed()
 
 	
 	return FReply::Handled();
-}
-
-void SMyCompoundWidget::HandlePlaybackPercentageOnHit(const USoundWave * PlayingSoundWave, const float PlaybackPercent)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Responded to PercentageOnHit, Percentage: %f"), PlaybackPercent);
 }
 
 FReply SMyCompoundWidget::SetStartingPosition() 

@@ -5,6 +5,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 #include "Sound/SoundWave.h"
+#if PLATFORM_WINDOWS
+#pragma optimize("", off)
+#endif
 
 
 
@@ -21,15 +24,12 @@ AMySecondPluginManager::AMySecondPluginManager()
 	PluginAudioPlayer->SetUISound(false);
 	PluginAudioPlayer->SetAutoActivate(false);
 
-	if (GameAudio)
-	{
-		PluginAudioPlayer->SetSound(GameAudio);
-	}
 
 	PluginAudioPlayer->OnAudioFinished.AddDynamic(this, &AMySecondPluginManager::HandleOnAudioFinished);
-	PluginAudioPlayer->OnAudioPlaybackPercent.AddDynamic(this, &AMySecondPluginManager::HandleOnPlaybackPercent);
 	PluginAudioPlayer->OnComponentActivated.AddDynamic(this, &AMySecondPluginManager::HandleOnComponentActivated);
 
+	PluginAudioPlayer->OnAudioPlaybackPercent.AddDynamic(this, &AMySecondPluginManager::HandleOnPlaybackPercent);
+		
 
 	RunningSpeed = 600.f;
 
@@ -43,18 +43,20 @@ void AMySecondPluginManager::BeginPlay()
 
 	FVector MyCharacterLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 
+
+
 	float Delta = (MyCharacterLocation.X - GetActorLocation().X) / (float)RunningSpeed;
 	//PluginAudioPlayer->Play(Delta);
 
 	//UE_LOG(LogTemp, Warning, TEXT("Delta: %f"), Delta);
 }
 
-void AMySecondPluginManager::HandleOnPlaybackPercent(const USoundWave* PlayingWave, const float PlaybackPercent)
+void AMySecondPluginManager::HandleOnPlaybackPercent(const USoundWave* PlayingSoundWave, const float PlaybackPercent)
 {
-	const float CurrentPlaybackTime = PlayingWave->Duration * PlaybackPercent;
-	UE_LOG(LogTemp, Warning, TEXT("OnMusicPlayback: %s. "), *PlayingWave->GetName());
-
+	//float CurrentPlaybackTime = PlayingWave->Duration * PlaybackPercent;
+	UE_LOG(LogTemp, Warning, TEXT("ActorPlayback: %s. Percent: %s"), *PlayingSoundWave->GetName(), *FString::SanitizeFloat(PlaybackPercent));
 }
+
 
 void AMySecondPluginManager::HandleOnAudioFinished()
 {
@@ -105,9 +107,9 @@ void AMySecondPluginManager::Tick(float DeltaTime)
 
 
 
-USoundWave* AMySecondPluginManager::GetAudio()
-{
-	return GameAudio;
-}
 
 
+
+#if PLATFORM_WINDOWS
+#pragma optimize("", on)
+#endif
