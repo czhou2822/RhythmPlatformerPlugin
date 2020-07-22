@@ -65,8 +65,10 @@ private:
 	FVector2D BorderUpperRight ;
 	FVector2D BorderLowerRight;
 	FVector2D BorderLowerLeft;
+
 	FVector CamaraStartLocation;
 	FVector CamaraLocation;
+
 	FEditorViewportClient* MyEditorViewportClient;
 	USoundWave* MySoundWave;
 	UAudioComponent* MyAudioPlayer;
@@ -89,8 +91,9 @@ private:
 	int32 Padding;
 	int32 BorderWidth;
 	int32 BorderHeight;
-	int32 PlayerRunningSpeed;
-	float PlaybackSpeed ;
+	float PlayerRunningSpeed;
+	float PlaybackSpeed;
+	float LastPausePercentage;
 
     UMySecondPluginTextRW* MySecondPluginTextRW;
 	AMySecondPluginManager* PluginManagerObject;
@@ -115,6 +118,8 @@ private:
 	void UpdateSnapLine();
 
 	void InitializeMyCompoundWidget();
+
+
 
 	/* Button Events   */
 	FReply MyPauseAndPlay();

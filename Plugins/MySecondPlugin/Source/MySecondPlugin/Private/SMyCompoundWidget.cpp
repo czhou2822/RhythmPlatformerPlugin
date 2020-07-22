@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-#define OUT 
+
 
 #include "SMyCompoundWidget.h"
 #include "DrawElements.h"
@@ -15,6 +15,9 @@
 #include "MySecondPluginTextRW.h"
 #include "Dom/JsonObject.h"
 #include "AudioDevice.h"
+#if PLATFORM_WINDOWS
+#pragma optimize("", on)
+#endif
 
 
 
@@ -260,8 +263,8 @@ FReply SMyCompoundWidget::ReloadWave()
 
 			MyAudioPlayer->OnAudioPlaybackPercentNative.AddSP(this, &SMyCompoundWidget::HandleOnAudioPlaybackPercentNative);
 
-//			PluginManagerObject->PluginAudioPlayer->OnAudioPlaybackPercentNative.AddDynamic(this, &SMyCompoundWidget::HandleOnAudioPlaybackPercent);
-//			WindowLength = (float) (NUMBER_OF_LINES_IN_WINDOW) / (float)RawDrawArray.Num() * (float)MySoundWave->Duration;
+			LastPausePercentage = 0.f;
+
 			BPM = 60.f;
 			if (!MySoundWave)
 			{
@@ -299,6 +302,7 @@ FReply SMyCompoundWidget::Reset()
 	AudioDuration = MySoundWave->Duration;
 	AudioCursor = 0;  //reset audio cursor
 	AudioPercentage = 0;
+	LastPausePercentage = 0.f;
 	MyEditorViewportClient->SetViewLocation(CamaraStartLocation);
 	return FReply::Handled();
 
@@ -343,7 +347,6 @@ void SMyCompoundWidget::UpperBorderSize()
 	
 }
 
-
 void SMyCompoundWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) // called everyframe and used for our gamelogic
 {
 	if (!bIsManagerValid)
@@ -356,15 +359,16 @@ void SMyCompoundWidget::Tick(const FGeometry& AllottedGeometry, const double InC
 
 	if ((!MyAudioPlayer->bIsPaused) && (AudioPercentage <= 1))
 	{
-		AudioCursor += InDeltaTime * (float)PlaybackSpeed;
+		//AudioCursor += InDeltaTime * (float)PlaybackSpeed;
 	}
 	else
 	{
 		AudioCursor = (MyEditorViewportClient->GetViewLocation().X - CamaraStartLocation.X) / PluginManagerObject->RunningSpeed;
+		AudioPercentage = AudioCursor / AudioDuration;
+
 	}
 
 
-	AudioPercentage = AudioCursor / AudioDuration;
 	SnapLineCursor = (AudioPercentage * RawDataArray.Num()) / ZoomFactor;
 
 	SMyCompoundWidget::UpdateCamaraLookAt();
@@ -380,12 +384,9 @@ void SMyCompoundWidget::UpdateCamaraLookAt()
 	{
 		CamaraLocation = MyEditorViewportClient->GetViewLocation();
 		
-		int Delta = AudioCursor * PluginManagerObject->RunningSpeed;
-
+		float Delta = AudioCursor * PlayerRunningSpeed;
 
 		SMyCompoundWidget::RawDrawArrayToDrawArray(SnapLineCursor, NUMBER_OF_LINES_IN_WINDOW + SnapLineCursor, RawDrawArray);
-		//MyEditorViewportClient->SetViewLocation(CamaraStartLocation + FVector(Delta, 0, 0));
-
 
 		MyEditorViewportClient->SetViewLocation(FVector(CamaraStartLocation.X + Delta, CamaraLocation.Y, CamaraLocation.Z));
 	}
@@ -408,7 +409,6 @@ void SMyCompoundWidget::UpdateSnapLine()
 	SnapLine[0] = (BorderUpperLeft + BorderUpperRight) / 2;
 	SnapLine[1] = SnapLine[0] + FVector2D(0,3000);		
 }
-
 
 int32 SMyCompoundWidget::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyClippingRect, FSlateWindowElementList& OutDrawElements,	int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
@@ -454,7 +454,6 @@ int32 SMyCompoundWidget::OnPaint(const FPaintArgs& Args, const FGeometry& Allott
 
 FReply SMyCompoundWidget::MyPauseAndPlay()
 {
-	//AudioCursor = AudioCursor * PlaybackSpeed;
 	if (MyAudioPlayer->bIsPaused)
 	{
 		MyAudioPlayer->Play(AudioCursor);
@@ -464,7 +463,6 @@ FReply SMyCompoundWidget::MyPauseAndPlay()
 	{
 		MyAudioPlayer->SetPaused(!MyAudioPlayer->bIsPaused);
 	}
-
 
 	return FReply::Handled();
 }
@@ -513,7 +511,19 @@ FReply SMyCompoundWidget::TestFunction()
 
 void SMyCompoundWidget::HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PluginPlayback: %s. Percent: %s"), *PlayingSoundWave->GetName(), *FString::SanitizeFloat(PlaybackPercent));
+	if (!MyAudioPlayer->bIsPaused)
+	{
+		AudioPercentage = PlaybackPercent + LastPausePercentage;
+		AudioCursor = AudioPercentage * AudioDuration;
+	}
+	else
+	{
+		LastPausePercentage = AudioPercentage;
+	}
+	//float PlaybackTime = AudioPercentage * AudioDuration;
+	//float PlayerLocation = PlaybackTime * (float)PlayerRunningSpeed;
+	//UE_LOG(LogTemp, Warning, TEXT("Percent: %s, PlaybackTime: %s, PlayerLocation: %s"), *FString::SanitizeFloat(AudioPercentage), *FString::SanitizeFloat(PlaybackTime), *FString::SanitizeFloat(PlayerLocation));
+
 }
 
 FReply SMyCompoundWidget::LoadLevel()
@@ -832,7 +842,6 @@ void SMyCompoundWidget::RawDrawArrayToDrawArray(int Start, const int End, TArray
 /*given a point, it calculates the beat grid in that window. 
 For example, if there's beat at 3s and the window is 5s, it calculates the beat. 
 Called every frames. */
-
 void SMyCompoundWidget::GetBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const //CurrentCorsor feeds audiocursor
 {
 	float  Border = 0;
@@ -899,3 +908,6 @@ void SMyCompoundWidget::GetBeatGrid(float CurrentCursor, const FGeometry& Allott
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+#if PLATFORM_WINDOWS
+#pragma optimize("", on)
+#endif
