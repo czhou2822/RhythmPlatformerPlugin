@@ -15,6 +15,8 @@
 #include "MySecondPluginTextRW.h"
 #include "Dom/JsonObject.h"
 #include "AudioDevice.h"
+#include "Containers/Array.h"
+
 #if PLATFORM_WINDOWS
 #pragma optimize("", on)
 #endif
@@ -195,10 +197,10 @@ void SMyCompoundWidget::Construct(const FArguments& InArgs)
 							.OnHovered(this, &SMyCompoundWidget::MyHover)
 							.Visibility(EVisibility::Visible)
 							.Content()
-								[
-									SAssignNew(ButtonLabel, STextBlock)
-									.Text(FText::FromString(TEXT("RefreshRunningSpeed")))
-								]
+							[
+								SAssignNew(ButtonLabel, STextBlock)
+								.Text(FText::FromString(TEXT("RefreshRunningSpeed")))
+							]
 						]
 
 				]
@@ -213,6 +215,36 @@ void SMyCompoundWidget::HandleOnSliderChanged()
 {
 	UE_LOG(LogTemp, Log, TEXT("Changed!"));
 }
+
+void SMyCompoundWidget::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation)
+{
+	BeatRawArray.Empty();
+
+	float NextBeatTime = 0.f;
+
+	float BeatInveral = 60.f / InBPM;
+
+	while (NextBeatTime <= InAudioDuation)
+	{
+		BeatRawArray.Add(NextBeatTime);
+		NextBeatTime += BeatInveral;
+	}
+
+	return;
+
+}
+
+bool SMyCompoundWidget::ResetAudio()
+{
+	AudioDuration = MySoundWave->Duration;
+	AudioCursor = 0;  //reset audio cursor
+	AudioPercentage = 0;
+	LastPausePercentage = 0.f;
+	MyEditorViewportClient->SetViewLocation(CamaraStartLocation);
+	CalculateRawBeatArray(BPM, AudioDuration);
+	return true;
+}
+
 
 void SMyCompoundWidget::InitializeMyCompoundWidget()
 {
@@ -265,7 +297,7 @@ FReply SMyCompoundWidget::ReloadWave()
 
 			LastPausePercentage = 0.f;
 
-			BPM = 60.f;
+
 			if (!MySoundWave)
 			{
 				FMessageDialog::Open(EAppMsgType::Ok, FText::FromString("Sound Not Set"));
@@ -273,13 +305,11 @@ FReply SMyCompoundWidget::ReloadWave()
 				return FReply::Handled();
 			}
 			MyEditorViewportClient->SetViewLocation(CamaraStartLocation);
-			AudioDuration = MySoundWave->Duration;
-			AudioCursor = 0;  //reset audio cursor
-			AudioPercentage = 0;
-			RawDataArray = SMyCompoundWidget::WaveToRawDataArray(MySoundWave); //load raw data to AudioWaveformDataArray
-			SMyCompoundWidget::RawDataArrayToRawDrawArray(RawDataArray, ZoomFactor);
+			ResetAudio();
+			DataRawArray = SMyCompoundWidget::WaveToRawDataArray(MySoundWave); //load raw data to AudioWaveformDataArray
+			SMyCompoundWidget::RawDataArrayToRawDrawArray(DataRawArray, ZoomFactor);
 			PlayerRunningSpeed = PluginManagerObject->RunningSpeed;
-			WindowLength = (NUMBER_OF_LINES_IN_WINDOW * ZoomFactor) / ((float)RawDataArray.Num()) * (float)MySoundWave->Duration;
+			WindowLength = (NUMBER_OF_LINES_IN_WINDOW * ZoomFactor) / ((float)DataRawArray.Num()) * (float)MySoundWave->Duration;
 			BorderUnitPerSecond = (float)BorderWidth /WindowLength ;
 			UE_LOG(LogTemp, Warning, TEXT("Duration: %2.3f."), MySoundWave->Duration);
 			UE_LOG(LogTemp, Warning, TEXT("Data size: %d."), MySoundWave->RawData.GetElementCount());
@@ -299,13 +329,8 @@ FReply SMyCompoundWidget::ReloadWave()
 
 FReply SMyCompoundWidget::Reset()
 {
-	AudioDuration = MySoundWave->Duration;
-	AudioCursor = 0;  //reset audio cursor
-	AudioPercentage = 0;
-	LastPausePercentage = 0.f;
-	MyEditorViewportClient->SetViewLocation(CamaraStartLocation);
+	ResetAudio();
 	return FReply::Handled();
-
 }
 
 /**
@@ -354,8 +379,8 @@ void SMyCompoundWidget::Tick(const FGeometry& AllottedGeometry, const double InC
 		return;
 	}
 	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
-	SMyCompoundWidget::UpperBorderSize();
-	SMyCompoundWidget::UpdateSnapLine();
+	UpperBorderSize();
+	UpdateSnapLine();
 
 	if ((!MyAudioPlayer->bIsPaused) && (AudioPercentage <= 1))
 	{
@@ -369,10 +394,10 @@ void SMyCompoundWidget::Tick(const FGeometry& AllottedGeometry, const double InC
 	}
 
 
-	SnapLineCursor = (AudioPercentage * RawDataArray.Num()) / ZoomFactor;
+	SnapLineCursor = (AudioPercentage * DataRawArray.Num()) / ZoomFactor;
 
-	SMyCompoundWidget::UpdateCamaraLookAt();
-
+	UpdateCamaraLookAt();
+	GetBeatGrid(AudioCursor);
 	//FActiveSound* ActiveSound = MyAudioPlayer->GetAudioDevice()->FindActiveSound(MyAudioPlayer->GetAudioComponentID());
 	//UE_LOG(LogTemp, Warning, TEXT("Playback sound: %s"), *FString::SanitizeFloat( ActiveSound->PlaybackTime));
 
@@ -386,7 +411,7 @@ void SMyCompoundWidget::UpdateCamaraLookAt()
 		
 		float Delta = AudioCursor * PlayerRunningSpeed;
 
-		SMyCompoundWidget::RawDrawArrayToDrawArray(SnapLineCursor, NUMBER_OF_LINES_IN_WINDOW + SnapLineCursor, RawDrawArray);
+		SMyCompoundWidget::RawDrawArrayToDrawArray(SnapLineCursor, NUMBER_OF_LINES_IN_WINDOW + SnapLineCursor, DataDrawArray);
 
 		MyEditorViewportClient->SetViewLocation(FVector(CamaraStartLocation.X + Delta, CamaraLocation.Y, CamaraLocation.Z));
 	}
@@ -396,12 +421,6 @@ FReply SMyCompoundWidget::OnMouseMove(const FGeometry & MyGeometry, const FPoint
 {
 	SWidget::OnMouseMove(MyGeometry, MouseEvent);
 	return FReply::Unhandled();
-}
-
-FReply SMyCompoundWidget::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "works");
-	return FReply::Handled();
 }
 
 void SMyCompoundWidget::UpdateSnapLine()
@@ -446,7 +465,7 @@ int32 SMyCompoundWidget::OnPaint(const FPaintArgs& Args, const FGeometry& Allott
 		);
 
 		//SnapLineCursor
-		//SMyCompoundWidget::GetBeatGrid(AudioCursor, AllottedGeometry, OutDrawElements, LayerId);
+		SMyCompoundWidget::DrawBeatGrid(AudioCursor, AllottedGeometry, OutDrawElements, LayerId);
 
 
 	return   SCompoundWidget::OnPaint(Args, AllottedGeometry, MyClippingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
@@ -638,10 +657,10 @@ void SMyCompoundWidget::CheckWaveformData(uint8 * InputArray)
 	
 	TArray<TArray<float>> OutAmplitudes;
 
-	RawDataArray = SMyCompoundWidget::WaveToRawDataArray(MySoundWave);
+	DataRawArray = SMyCompoundWidget::WaveToRawDataArray(MySoundWave);
 
 	UE_LOG(LogTemp, Warning, TEXT("USoundWaveCount: %d."), MySoundWave->RawData.GetElementCount());
-	UE_LOG(LogTemp, Warning, TEXT("OutAmplitudesCount: %d."), RawDataArray.Num());
+	UE_LOG(LogTemp, Warning, TEXT("OutAmplitudesCount: %d."), DataRawArray.Num());
 
 
 	
@@ -698,7 +717,7 @@ TArray<float> SMyCompoundWidget::WaveToRawDataArray(USoundWave * SoundWave)
 */
 void SMyCompoundWidget::RawDataArrayToRawDrawArray(const TArray<float>& InputArray, int BucketSize )
 {
-	RawDrawArray.Empty();
+	DataDrawArray.Empty();
 	float YOffset = Padding + BorderHeight / 2.f;
 	int InputArrayIndex = 0;
 	int NumberOfBuckets = (InputArray.Num() - (InputArray.Num() % BucketSize)) / BucketSize;
@@ -727,7 +746,7 @@ void SMyCompoundWidget::RawDataArrayToRawDrawArray(const TArray<float>& InputArr
 
 		Temp = YOffset - (Temp * YScale);
 
-		RawDrawArray.Add(Temp);
+		DataDrawArray.Add(Temp);
 
 	}
 
@@ -839,19 +858,19 @@ void SMyCompoundWidget::RawDrawArrayToDrawArray(int Start, const int End, TArray
 	}
 }
 
-/*given a point, it calculates the beat grid in that window. 
-For example, if there's beat at 3s and the window is 5s, it calculates the beat. 
+/*given a point, it calculates the beat grid in that window.
+For example, if there's beat at 3s and the window is 5s, it calculates the beat.
 Called every frames. */
-void SMyCompoundWidget::GetBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const //CurrentCorsor feeds audiocursor
+void SMyCompoundWidget::GetBeatGrid(float CurrentCursor)
 {
 	float  Border = 0;
 
-	int32 StartingIndex = 1;	
+	int32 StartingIndex = 1;
 	int32 LastXCord = Padding;
 	float LowerBound = CurrentCursor - WindowLength / 2; //where beat grid starts to render. -> left side of the screen. 
 	if (CurrentCursor - WindowLength / 2 < WindowLength / 2)  //if cursor is less than half of window length, that means window is fill with head. No beat should be rendered.
 	{
-	//	return;
+		//	return;
 	}
 
 	if (CurrentCursor < WindowLength / 2) //header presented
@@ -866,45 +885,71 @@ void SMyCompoundWidget::GetBeatGrid(float CurrentCursor, const FGeometry& Allott
 	else                                        //default
 	{
 		Border = CurrentCursor + WindowLength / 2;
-		while ((RawBeatArray[StartingIndex] < (LowerBound)) && (StartingIndex < RawBeatArray.Num()))
+		while ((BeatRawArray[StartingIndex] < (LowerBound)) && (StartingIndex < BeatRawArray.Num()))
 		{
 			StartingIndex++;
 		}
 
-		LastXCord = LastXCord + (RawBeatArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
-		
+		LastXCord = LastXCord + (BeatRawArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
 	}
-	
 
-     
+	BeatDrawArray.Empty();
 
-	while ((RawBeatArray[StartingIndex] < Border) && (StartingIndex < RawBeatArray.Num()))
+	while ((BeatRawArray[StartingIndex] < Border) && (StartingIndex < BeatRawArray.Num()))
 	{
-		float XCord = LastXCord + (RawBeatArray[StartingIndex] - RawBeatArray[StartingIndex - 1]) * BorderUnitPerSecond;
 
+		float XCord = LastXCord + (BeatRawArray[StartingIndex] - BeatRawArray[StartingIndex - 1]) * BorderUnitPerSecond;
+
+		
+		BeatDrawArray.Add(FVector2D(XCord, Padding));   //top point
+		BeatDrawArray.Add(FVector2D(XCord, Padding) + FVector2D(0, 500)); //bottom point
+
+		StartingIndex++;
+
+		LastXCord = XCord;
+
+	}
+}
+
+/*
+this function is called multiple times while on painting phase. 
+e.g., if theres 2 beat line in presence, BeatDrawArray will have 4 points [1top, 1bot, 2top, 2bot]
+this function groups 1top and 1bot as the first line, 2top and 2 bot as the second line. 
+*/
+void SMyCompoundWidget::DrawBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const //CurrentCorsor feeds audiocursor
+{
+
+	for (int32 i = 0; i < BeatDrawArray.Num(); i += 2)
+	{
 		FSlateDrawElement::MakeLines(OutDrawElements,    //render beat grid one by one
 			LayerId,
 			AllottedGeometry.ToPaintGeometry(),
-			{ FVector2D(XCord, Padding), FVector2D(XCord, Padding + 500) },
+			{ BeatDrawArray[i], BeatDrawArray[i+1] },
 			ESlateDrawEffect::None,
 			FLinearColor::Green,
 			true,
 			0.5
 		);
-
-
-		StartingIndex++;
-		//if (StartingIndex > RawBeatArray.Num())
-		//{
-		//	return;
-		//}
-
-		LastXCord = XCord;
-
 	}
 	
 }
 
+
+FReply SMyCompoundWidget::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "onkeydown");
+	SnapToBeat();
+	return FReply::Handled();
+}
+
+void SMyCompoundWidget::SnapToBeat()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "snaptobeat");
+
+	FVector2D ViewPortSize = FVector2D(MyEditorViewportClient->Viewport->GetSizeXY());
+
+	MyEditorViewportClient->Viewport->SetMouse(BeatDrawArray[0].X, ViewPortSize.Y / 2);
+}
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -44,13 +44,14 @@ private:
 
 	TArray<FVector2D> DrawArray;	//DrawArray
 
+
+	TArray<float> DataRawArray;    //Raw data from wave file   
+
+	TArray<float> DataDrawArray;   //RawDrawArray processed from RawDataArray, contain (RawDataArray.size()/bucketsize) elements
+
 	TArray<FVector2D> BeatDrawArray;	//BeatArray
 
-	TArray<float> RawDataArray;    //Raw data from wave file   
-
-	TArray<float> RawDrawArray;   //RawDrawArray processed from RawDataArray, contain (RawDataArray.size()/bucketsize) elements
-
-	TArray<float> RawBeatArray = { 0.f, 1.f, 2.f, 3.f, 4.f,5.f, 6.f };    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
+	TArray<float> BeatRawArray = { 0.f, 1.f, 2.f, 3.f, 4.f,5.f, 6.f };    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
 
 	
 
@@ -77,7 +78,7 @@ private:
 	int32 SnapLineCursor = 0;
 	float AudioPercentage = 0;
 	float AudioDuration = 0;
-	float BPM = 0.f;
+	float BPM = 79.f;  //78
 	float BorderUnitPerSecond = 0.f;  //how much BorderUnit is ONE second represented. E.g, if Para = 50, it means 50 BorderUnits is ONE second. 
 	
 
@@ -98,6 +99,7 @@ private:
     UMySecondPluginTextRW* MySecondPluginTextRW;
 	AMySecondPluginManager* PluginManagerObject;
 
+public:
 
 private:
 	
@@ -107,17 +109,22 @@ private:
 
 	FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
-	FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 
 	void RawDataArrayToRawDrawArray(const TArray<float>& InputArray, int BucketSize);
 
 	void RawDrawArrayToDrawArray(const int Start, const int End, TArray<float>& InRawDrawArray);
 
-	void GetBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const;
+	//calculates BeatDrawArray
+	void GetBeatGrid(float CurrentCursor);
+
+	//calls make line using BeatDrawArray
+	void DrawBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const;
 
 	void UpdateSnapLine();
 
 	void InitializeMyCompoundWidget();
+
+	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 
 
 
@@ -158,4 +165,14 @@ public:
 	void HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
 
 	void HandleOnSliderChanged();
+
+	/*
+	generates elements for RawBeatArray
+	e.g., if bpm = 60, RawBeatArray = {0,1,2,3}
+	*/
+	void CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation);
+
+	bool ResetAudio();
+
+	void SnapToBeat();
 };
