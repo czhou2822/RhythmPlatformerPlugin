@@ -25,8 +25,6 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-
-
 void SMyCompoundWidget::Construct(const FArguments& InArgs)
 {
 	Label = InArgs._Label;
@@ -131,7 +129,7 @@ void SMyCompoundWidget::Construct(const FArguments& InArgs)
 							[
 								SNew(SSlider)
 								.Visibility(EVisibility::Visible)
-								.OnControllerCaptureEnd(this, &SMyCompoundWidget::HandleOnSliderChanged)
+								.OnValueChanged(this, &SMyCompoundWidget::HandleOnSliderChanged)
 								.MinValue(0.0f)
 								.MaxValue(1.0f)
 							]
@@ -155,7 +153,7 @@ void SMyCompoundWidget::Construct(const FArguments& InArgs)
 								.Text(FText::FromString(TEXT("TestButton")))
 							]
 						]
-					+ SVerticalBox::Slot()   //  print text
+					+ SVerticalBox::Slot()   //  Save Level
 						.VAlign(VAlign_Top)
 						.HAlign(HAlign_Left)
 						[
@@ -169,7 +167,7 @@ void SMyCompoundWidget::Construct(const FArguments& InArgs)
 								.Text(FText::FromString(TEXT("Save Level")))
 							]
 						]
-					+ SVerticalBox::Slot()   // change text
+					+ SVerticalBox::Slot()   // Load Level
 						.VAlign(VAlign_Top)
 						.HAlign(HAlign_Left)
 						[
@@ -202,6 +200,20 @@ void SMyCompoundWidget::Construct(const FArguments& InArgs)
 								.Text(FText::FromString(TEXT("RefreshRunningSpeed")))
 							]
 						]
+					+ SVerticalBox::Slot()   //  print text
+						.VAlign(VAlign_Top)
+						.HAlign(HAlign_Left)
+						[
+							SNew(SButton)
+							.OnClicked(this, &SMyCompoundWidget::ChangeBeatStartingTime)
+							.OnHovered(this, &SMyCompoundWidget::MyHover)
+							.Visibility(EVisibility::Visible)
+							.Content()
+							[
+								SAssignNew(ButtonLabel, STextBlock)
+								.Text(FText::FromString(TEXT("LetBeatStartsHere")))
+							]
+						]
 
 				]
 		];
@@ -211,16 +223,26 @@ void SMyCompoundWidget::Construct(const FArguments& InArgs)
 
 }
 
-void SMyCompoundWidget::HandleOnSliderChanged()
+void SMyCompoundWidget::HandleOnSliderChanged(float InFloat)
 {
-	UE_LOG(LogTemp, Log, TEXT("Changed!"));
+	UE_LOG(LogTemp, Log, TEXT("Changed! %s"), *FString::SanitizeFloat(InFloat));
+	ChangePlaybackRate(InFloat);
 }
 
-void SMyCompoundWidget::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation)
+FReply SMyCompoundWidget::ChangeBeatStartingTime()
+{
+	BeatStartingTime = AudioCursor;
+
+	CalculateRawBeatArray(BPM, AudioDuration, BeatStartingTime);
+
+	return FReply::Handled();
+}
+
+void SMyCompoundWidget::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime)
 {
 	BeatRawArray.Empty();
 
-	float NextBeatTime = 0.f;
+	float NextBeatTime = 0.f + InBeatStartingTime;
 
 	float BeatInveral = 60.f / InBPM;
 
@@ -244,7 +266,6 @@ bool SMyCompoundWidget::ResetAudio()
 	CalculateRawBeatArray(BPM, AudioDuration);
 	return true;
 }
-
 
 void SMyCompoundWidget::InitializeMyCompoundWidget()
 {
@@ -501,22 +522,24 @@ FReply SMyCompoundWidget::MarkTimeStamp()
 	return FReply::Handled();
 }
 
-FReply SMyCompoundWidget::ChangePlaybackRate()
+void SMyCompoundWidget::ChangePlaybackRate(const float& InFloat)
 {
-	if (PlaybackSpeed == 1)
-	{
-		PlaybackSpeed = 0.5f;
-	}
-	else
-	{
-		PlaybackSpeed = 1.f;
-	}
+	//if (PlaybackSpeed == 1)
+	//{
+	//	PlaybackSpeed = 0.5f;
+	//}
+	//else
+	//{
+	//	PlaybackSpeed = 1.f;
+	//}
+
+	PlaybackSpeed = InFloat;
 
 	MyAudioPlayer->SetPitchMultiplier(PlaybackSpeed);
 
 
 
-	return FReply::Handled();
+	return;
 }
 
 FReply SMyCompoundWidget::TestFunction()
@@ -859,7 +882,7 @@ void SMyCompoundWidget::RawDrawArrayToDrawArray(int Start, const int End, TArray
 }
 
 /*given a point, it calculates the beat grid in that window.
-For example, if there's beat at 3s and the window is 5s, it calculates the beat.
+For example, if there's beat at 3s and the window is 5s, it calculates those beats.
 Called every frames. */
 void SMyCompoundWidget::GetBeatGrid(float CurrentCursor)
 {
@@ -934,21 +957,101 @@ void SMyCompoundWidget::DrawBeatGrid(float CurrentCursor, const FGeometry& Allot
 	
 }
 
-
 FReply SMyCompoundWidget::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "onkeydown");
-	SnapToBeat();
+	//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "onkeydown");
+	//SnapToBeat();
 	return FReply::Handled();
 }
 
+//need to revise
 void SMyCompoundWidget::SnapToBeat()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "snaptobeat");
+	//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, "SnapToBeat");
+
+	//UE_LOG(LogTemp, Warning, TEXT("%i"), MyEditorViewportClient->current);
+	
+	//leftmost, rightmost
+
+
+	/*
+	2 case: on beat and not on beat
+	if on beat, left most & right most = current index +- 1
+	if not on beat, find left and right index 
+
+	check if mouseX < first beat, if so, leftmost index = self, rightmost index = [0]
+	check if mouseX > last beat, if so, leftmost index = index[length], rightmost index = self
+
+	check if (mouseX - drawbeatarray[i]) * (mouseX - drawbeatarray[i+1]) < 0
+	if so, mouseX fall in range, leftmost = i, rightmost = i+1;
+	if == 0, mouseX fall ON BEAT, leftmost = i-1, rightmost = i+1;
+	else, keel moving on
+	*/
 
 	FVector2D ViewPortSize = FVector2D(MyEditorViewportClient->Viewport->GetSizeXY());
 
-	MyEditorViewportClient->Viewport->SetMouse(BeatDrawArray[0].X, ViewPortSize.Y / 2);
+	if (MyEditorViewportClient->Viewport)
+	{
+		int32 MouseDeltaX = MyEditorViewportClient->GetCachedMouseX() - MyEditorViewportClient->Viewport->GetMouseX();
+		/* delta < 0 -> mouse moves to the right */
+		/* delta > 0 -> mouse moves to the left*/
+		int32 NewBeatIndex = -1;
+		int32 LeftMostIndex = -1;
+		int32 RightMostIndex = -1;
+
+		int32 CurrentMouseX = MyEditorViewportClient->Viewport->GetMouseX();
+		
+		if (CurrentMouseX <= BeatDrawArray[0].X)
+		{
+			LeftMostIndex = 0;
+			RightMostIndex = 0;
+		}
+		else if (CurrentMouseX >= BeatDrawArray[BeatDrawArray.Num()-1].X)
+		{
+			LeftMostIndex = BeatDrawArray.Num();
+			RightMostIndex = BeatDrawArray.Num();
+		}
+
+		else
+		{
+			for (int32 BeatArrayIndex = 0; BeatArrayIndex <= BeatDrawArray.Num() - 2; BeatArrayIndex++)   //check if mouse is on beat already
+			{
+				int32 LeftBeat = BeatDrawArray[BeatArrayIndex].X;
+				int32 RightBeat = BeatDrawArray[BeatArrayIndex + 1].X;
+
+				int32 Direction = (CurrentMouseX - LeftBeat) * (CurrentMouseX - RightBeat); //<0 in range, >0 out of range, ==0, on beat
+				if (Direction == 0)
+				{
+					LeftMostIndex = BeatArrayIndex-1;
+					RightMostIndex = BeatArrayIndex+1;
+				}
+				else if (Direction < 0)
+				{
+					LeftMostIndex = BeatArrayIndex;
+					RightMostIndex = BeatArrayIndex + 1;
+				}
+			}
+		}
+
+		if (MouseDeltaX > 5)   //set to left
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Set to Left, %i"), MouseDeltaX);
+			if (LeftMostIndex > 0 && LeftMostIndex < BeatDrawArray.Num())
+			{
+				MyEditorViewportClient->Viewport->SetMouse(BeatDrawArray[LeftMostIndex].X, ViewPortSize.Y / 2);
+			}
+		}
+		else if (MouseDeltaX < -5)  //set to right
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Set to Right, %i"), MouseDeltaX);
+			if (RightMostIndex > 0 && RightMostIndex < BeatDrawArray.Num())
+			{
+				MyEditorViewportClient->Viewport->SetMouse(BeatDrawArray[RightMostIndex].X, ViewPortSize.Y / 2);
+			}
+		}
+
+	}
+
 }
 
 

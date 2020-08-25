@@ -80,6 +80,7 @@ private:
 	float AudioDuration = 0;
 	float BPM = 79.f;  //78
 	float BorderUnitPerSecond = 0.f;  //how much BorderUnit is ONE second represented. E.g, if Para = 50, it means 50 BorderUnits is ONE second. 
+	float BeatStartingTime = 0.f;
 	
 
 	bool bInitialFlag = false;
@@ -134,11 +135,11 @@ private:
 	FReply ReloadWave();
 	FReply MarkTimeStamp();
 	FReply SetStartingPosition();
-	FReply ChangePlaybackRate();
 	FReply TestFunction();
 	FReply LoadLevel();
 	FReply SaveLevel();
 	FReply RefreshRunningSpeed();
+	FReply ChangeBeatStartingTime();
 
 
 public:
@@ -157,22 +158,31 @@ public:
 
 
 	void MyHover();
+
 	USoundWave* AudiofileLoader(int Selection);
+
 	void CheckWaveformData(uint8* InputArray);
+
 	TArray<float> WaveToRawDataArray(USoundWave* SoundWave);
 
 	//UFUNCTION()
 	void HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
+	
+	UFUNCTION()
+	void HandleOnSliderChanged(float InFloat);
 
-	void HandleOnSliderChanged();
+
 
 	/*
 	generates elements for RawBeatArray
 	e.g., if bpm = 60, RawBeatArray = {0,1,2,3}
 	*/
-	void CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation);
+	void CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime = 0.0f);
 
 	bool ResetAudio();
 
 	void SnapToBeat();
+
+	void ChangePlaybackRate(const float& InFloat);
+
 };
