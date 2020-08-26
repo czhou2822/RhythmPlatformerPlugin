@@ -78,7 +78,7 @@ private:
 	int32 SnapLineCursor = 0;
 	float AudioPercentage = 0;
 	float AudioDuration = 0;
-	float BPM = 79.f;  //78
+	float BPM = 78.f;  //78
 	float BorderUnitPerSecond = 0.f;  //how much BorderUnit is ONE second represented. E.g, if Para = 50, it means 50 BorderUnits is ONE second. 
 	float BeatStartingTime = 0.f;
 	

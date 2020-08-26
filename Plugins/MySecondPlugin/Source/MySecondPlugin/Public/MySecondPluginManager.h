@@ -25,7 +25,13 @@ public:
 	AMySecondPluginManager();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
-		UAudioComponent* PluginAudioPlayer;
+	UAudioComponent* PluginAudioPlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RunningSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BPM;
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,8 +39,6 @@ protected:
 
 	UFUNCTION()
 	void HandleOnComponentActivated( UActorComponent* Component, bool bReset);
-
-
 
 	UFUNCTION()
 	void HandleOnAudioFinished();
@@ -48,8 +52,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TestFunction();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RunningSpeed;
+
 
 	UFUNCTION(BlueprintCallable)
 	void PlaySoundFunction(float Start = 0);
