@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BPM;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BeatStartingTime;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

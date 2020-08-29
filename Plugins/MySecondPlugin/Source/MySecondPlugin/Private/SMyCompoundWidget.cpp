@@ -233,28 +233,16 @@ FReply SMyCompoundWidget::ChangeBeatStartingTime()
 {
 	BeatStartingTime = AudioCursor;
 
+	if (PluginManagerObject)
+	{
+		PluginManagerObject->BeatStartingTime = AudioCursor;
+	}
+
 	CalculateRawBeatArray(BPM, AudioDuration, BeatStartingTime);
 
 	return FReply::Handled();
 }
 
-void SMyCompoundWidget::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime)
-{
-	BeatRawArray.Empty();
-
-	float NextBeatTime = 0.f + InBeatStartingTime;
-
-	float BeatInveral = 60.f / InBPM;
-
-	while (NextBeatTime <= InAudioDuation)
-	{
-		BeatRawArray.Add(NextBeatTime);
-		NextBeatTime += BeatInveral;
-	}
-
-	return;
-
-}
 
 bool SMyCompoundWidget::ResetAudio()
 {
@@ -263,7 +251,18 @@ bool SMyCompoundWidget::ResetAudio()
 	AudioPercentage = 0;
 	LastPausePercentage = 0.f;
 	MyEditorViewportClient->SetViewLocation(CamaraStartLocation);
-	CalculateRawBeatArray(BPM, AudioDuration);
+	if (PluginManagerObject)
+	{
+		if (PluginManagerObject->BeatStartingTime)
+		{
+			BeatStartingTime = PluginManagerObject->BeatStartingTime;
+			CalculateRawBeatArray(BPM, AudioDuration, PluginManagerObject->BeatStartingTime);
+		}
+	}
+	else
+	{
+		CalculateRawBeatArray(BPM, AudioDuration);
+	}
 	return true;
 }
 
@@ -881,6 +880,28 @@ void SMyCompoundWidget::RawDrawArrayToDrawArray(int Start, const int End, TArray
 	}
 }
 
+/*
+calculatess beat array. e.g. if bpm = 60. BeatRawArray = {0,1,2,3 ...}
+*/
+void SMyCompoundWidget::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime)
+{
+	BeatRawArray.Empty();
+
+	BeatRawArray.Add(0.f);
+
+	float NextBeatTime = 0.f + InBeatStartingTime;
+
+	float BeatInveral = 60.f / InBPM;
+
+	while (NextBeatTime <= InAudioDuation)
+	{
+		BeatRawArray.Add(NextBeatTime);
+		NextBeatTime += BeatInveral;
+	}
+	return;
+
+}
+
 /*given a point, it calculates the beat grid in that window.
 For example, if there's beat at 3s and the window is 5s, it calculates those beats.
 Called every frames. */
@@ -896,10 +917,13 @@ void SMyCompoundWidget::GetBeatGrid(float CurrentCursor)
 		//	return;
 	}
 
+	BeatDrawArray.Empty();
+
 	if (CurrentCursor < WindowLength / 2) //header presented
 	{
 		Border = CurrentCursor + WindowLength / 2;
 		LastXCord = LastXCord + (WindowLength / 2 - CurrentCursor) * BorderUnitPerSecond;
+		//TODO add first beat
 	}
 	else if (CurrentCursor > AudioDuration)  //cursor is beyond audio file
 	{
@@ -915,8 +939,6 @@ void SMyCompoundWidget::GetBeatGrid(float CurrentCursor)
 
 		LastXCord = LastXCord + (BeatRawArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
 	}
-
-	BeatDrawArray.Empty();
 
 	while ((BeatRawArray[StartingIndex] < Border) && (StartingIndex < BeatRawArray.Num()))
 	{
