@@ -56,28 +56,36 @@ void FMySecondPluginModule::ShutdownModule()
 
 void FMySecondPluginModule::PluginButtonClicked()
 {
-	if (!bSMyWidgetInitilized)
-	{
-		FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-		//TSharedPtr<ILevelViewport> MyILevelViewport = LevelEditorModule.GetFirstActiveViewport();
-		MyCompoundWidget = SNew(SMyCompoundWidget);
+	//if (!bSMyWidgetInitilized)
+	//{
+	//	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+	//	//TSharedPtr<ILevelViewport> MyILevelViewport = LevelEditorModule.GetFirstActiveViewport();
+	//	MyCompoundWidget = SNew(SMyCompoundWidget);
 
-		LevelEditorModule.GetFirstActiveViewport()->AddOverlayWidget(MyCompoundWidget.ToSharedRef());
-		bSMyWidgetInitilized = true;
-	}
+	//	LevelEditorModule.GetFirstActiveViewport()->AddOverlayWidget(MyCompoundWidget.ToSharedRef());
+	//	bSMyWidgetInitilized = true;
+	//}
 
 
-	if (bPluginIsActivated == false)
-	{
-		MyCompoundWidget->SetVisibility(EVisibility::SelfHitTestInvisible);
-		bPluginIsActivated = true;
-	}
-	else
-	{
-		MyCompoundWidget->SetVisibility(EVisibility::Hidden);
-		bPluginIsActivated = false;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("IsActivated: %s"), bPluginIsActivated ? "1" : "0");
+	//if (bPluginIsActivated == false)
+	//{
+	//	MyCompoundWidget->SetVisibility(EVisibility::SelfHitTestInvisible);
+	//	bPluginIsActivated = true;
+	//}
+	//else
+	//{
+	//	MyCompoundWidget->SetVisibility(EVisibility::Hidden);
+	//	bPluginIsActivated = false;
+	//}
+	//UE_LOG(LogTemp, Warning, TEXT("IsActivated: %s"), bPluginIsActivated ? "1" : "0");
+
+	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+	RPPMain = SNew(SRPPMain);
+
+	LevelEditorModule.GetFirstActiveViewport()->AddOverlayWidget(RPPMain.ToSharedRef());
+	bSMyWidgetInitilized = true;
+
+
 }
 
 void FMySecondPluginModule::AddMenuExtension(FMenuBuilder& Builder)

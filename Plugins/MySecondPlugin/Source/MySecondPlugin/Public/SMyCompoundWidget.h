@@ -110,7 +110,6 @@ private:
 
 	FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
-
 	void RawDataArrayToRawDrawArray(const TArray<float>& InputArray, int BucketSize);
 
 	void RawDrawArrayToDrawArray(const int Start, const int End, TArray<float>& InRawDrawArray);

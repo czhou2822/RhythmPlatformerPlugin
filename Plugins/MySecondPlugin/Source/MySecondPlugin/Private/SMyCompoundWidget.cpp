@@ -243,7 +243,6 @@ FReply SMyCompoundWidget::ChangeBeatStartingTime()
 	return FReply::Handled();
 }
 
-
 bool SMyCompoundWidget::ResetAudio()
 {
 	AudioDuration = MySoundWave->Duration;

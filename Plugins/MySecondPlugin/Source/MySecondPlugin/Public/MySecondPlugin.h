@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SMyCompoundWidget.h"
+#include "RPPMain.h"
 #include "Modules/ModuleManager.h"
 
 class FToolBarBuilder;
@@ -16,7 +17,10 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
 	TSharedPtr<SMyCompoundWidget> MyCompoundWidget;
+	TSharedPtr<SRPPMain> RPPMain;
+
 	/** This function will be bound to Command. */
 	void PluginButtonClicked();
 	
