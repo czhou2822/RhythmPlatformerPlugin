@@ -14,8 +14,8 @@ void SRPPWaveformCanvas::Construct(const FArguments& InArgs)
 	ChildSlot
 		[
 			SNew(SBox)
-			.WidthOverride(300)
-			.HeightOverride(400)
+			.WidthOverride(800)
+			.HeightOverride(200)
 			[
 				SNew(SImage)
 				.RenderOpacity(1.f)

@@ -26,7 +26,6 @@ void SRPPMainCanvas::Construct(const FArguments& InArgs)
 			+ SVerticalBox::Slot()
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Center)
-			.FillHeight(1.0)
 			[
 				SAssignNew(RPPBottomToolBox, SRPPBottomToolBox)
 
