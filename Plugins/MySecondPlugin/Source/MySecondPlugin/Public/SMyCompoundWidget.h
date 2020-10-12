@@ -159,7 +159,7 @@ public:
 	void MyHover();
 
 	USoundWave* AudiofileLoader(int Selection);
-
+	
 	void CheckWaveformData(uint8* InputArray);
 
 	TArray<float> WaveToRawDataArray(USoundWave* SoundWave);

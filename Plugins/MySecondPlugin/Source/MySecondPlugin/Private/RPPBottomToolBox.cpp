@@ -53,13 +53,13 @@ void SRPPBottomToolBox::Construct(const FArguments& InArgs)
 		]
 
 		+SConstraintCanvas::Slot()
-		.Anchors(FAnchors(0.5f,0.5f))
-		.Alignment(FVector2D(0.5,0.5))
+		.Anchors(FAnchors(0.5f,0.0f))
+		.Alignment(FVector2D(0.5,0.0))
 		.AutoSize(true)
 		[
 			SNew(SButton)
 			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Center)
+			.VAlign(VAlign_Top)
 			.Text(FText::FromString(TEXT("Play/Pause")))
 		]
 	];

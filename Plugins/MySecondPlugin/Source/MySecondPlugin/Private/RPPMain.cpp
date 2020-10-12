@@ -24,7 +24,7 @@ void SRPPMain::Construct(const FArguments& InArgs)
 			]
 			+ SOverlay::Slot()
 			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Top)
+			.VAlign(VAlign_Fill)
 			[
 				SAssignNew(RPPMainCanvas, SRPPMainCanvas)
 			]
