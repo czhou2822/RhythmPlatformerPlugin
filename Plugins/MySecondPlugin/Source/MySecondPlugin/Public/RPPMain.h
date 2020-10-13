@@ -12,6 +12,7 @@
 #include "RPPButtonVBox.h"
 #include "RPPMainCanvas.h"
 
+
 /**
  * 
  */
@@ -24,12 +25,34 @@ public:
 
 	/** Constructs this widget with InArgs */
 
-public:
 
+private:
+
+	class AMySecondPluginManager* PluginManagerObject;
+
+	class URPPUtility* RPPUtil;
+
+	class FEditorViewportClient* EditorViewportClient;
+
+	float AudioCursor;    //playtime of the track, in seconds
+
+	float AudioDuration;
+
+	float AudioPercentage;
+
+	int32 SnaplineCursor; //index of the RawDrawArray. 
+
+	FVector CameraStartingLocation;
+
+public:
 	TSharedPtr<SRPPButtonVBox> RPPButtonVBox;
+
 	TSharedPtr<SRPPMainCanvas> RPPMainCanvas;
 
 
+private:
+	//called every frame
+	void UpdateCamaraLookAt();
 
 public:
 	
@@ -37,6 +60,13 @@ public:
 
 	void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime); // called everyframe and used for our gamelogic
 
+	//plugin init
+	void Initilization();
+
+	void ProcessSoundWave(USoundWave* InSoundWave);
+
+	//reset viewport, going back to the beginning of the level
+	void ResetViewport();
 
 
 };

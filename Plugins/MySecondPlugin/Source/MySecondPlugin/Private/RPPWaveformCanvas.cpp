@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RPPWaveformCanvas.h"
+#include "RPPUtility.h"
 
 
 
@@ -18,7 +19,7 @@ void SRPPWaveformCanvas::Construct(const FArguments& InArgs)
 			.HeightOverride(200)
 			[
 				SNew(SImage)
-				.RenderOpacity(0.2f)
+				.RenderOpacity(0.0f)
 			]
 		];
 }
@@ -43,6 +44,15 @@ int32 SRPPWaveformCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 		1.f
 	);
 
+	FSlateDrawElement::MakeLines(OutDrawElements,   //render waveform
+		LayerId,
+		AllottedGeometry.ToPaintGeometry(),
+		URPPUtility::DrawArray,
+		ESlateDrawEffect::None,
+		FLinearColor::Yellow,
+		true,
+		0.5f
+	);
 
 
 	return   SCompoundWidget::OnPaint(Args, AllottedGeometry, MyClippingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);

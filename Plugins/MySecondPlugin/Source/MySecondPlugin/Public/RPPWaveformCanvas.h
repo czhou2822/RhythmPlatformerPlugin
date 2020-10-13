@@ -23,6 +23,9 @@ public:
 private:
 	TArray<FVector2D> BoarderBox;
 
+	//this array gets passed into OnPaint
+	TArray<FVector2D> DrawArray;
+
 public:
 
 	float CanvasWidth;
@@ -44,6 +47,11 @@ public:
 		const FWidgetStyle& InWidgetStyle,
 		bool bParentEnabled) const override;
 
+	//canvas related
+	
+	//update the white border
 	void UpperBorderSize();
+
+
 
 };
