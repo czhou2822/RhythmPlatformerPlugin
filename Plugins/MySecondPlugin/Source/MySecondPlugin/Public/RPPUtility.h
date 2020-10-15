@@ -34,7 +34,7 @@ private:
 	static const int32 NUMBER_OF_LINES_IN_WINDOW = 20000;
 
 public:
-	//draw arrays
+	//waveform-related draw arrays
 	//wav data were loaded from file to DataRawArray
 	//program then process DataRawArray to DataDrawArray (such as average peak value), served as a base to DrawArray
 	static TArray<float> DataRawArray;    //Raw data from wave file   
@@ -42,6 +42,8 @@ public:
 	static TArray<float> DataDrawArray;   //RawDrawArray processed from RawDataArray, contain (RawDataArray.size()/bucketsize) elements
 
 	static TArray<FVector2D> DrawArray;	//DrawArray
+
+
 
 
 

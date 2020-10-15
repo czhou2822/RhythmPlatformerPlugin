@@ -26,6 +26,8 @@ private:
 	//this array gets passed into OnPaint
 	TArray<FVector2D> DrawArray;
 
+
+
 public:
 
 	float CanvasWidth;

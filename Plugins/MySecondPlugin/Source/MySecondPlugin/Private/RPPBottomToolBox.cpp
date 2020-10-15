@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+//engine includes
 #include "Widgets/Layout/SConstraintCanvas.h"
 
-
+//user includes
 #include "RPPBottomToolBox.h"
 
 
@@ -15,6 +16,9 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SRPPBottomToolBox::Construct(const FArguments& InArgs)
 {
 	SetVisibility(EVisibility::Visible);
+
+	NewValue = InArgs._TestValue;
+	RPPMain = InArgs._RhythmPlatformingPluginMain;
 
 	ChildSlot
 	[
@@ -34,8 +38,8 @@ void SRPPBottomToolBox::Construct(const FArguments& InArgs)
 				.VAlign(VAlign_Center)
 				.AutoWidth()
 				[
-					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("Playback Speed: 1X")))
+					SAssignNew(PlaybackRateText, STextBlock)
+					.Text(FText::FromString(TEXT("Playback Speed: 1")))
 				]
 
 				+ SHorizontalBox::Slot()
@@ -46,8 +50,8 @@ void SRPPBottomToolBox::Construct(const FArguments& InArgs)
 					SNew(SBox)
 					[
 						SAssignNew(PlaybackSlider, SSlider)
+						.OnValueChanged(this, &SRPPBottomToolBox::HandleOnSliderChanged)
 					]
-
 				]
 			]
 		]
@@ -60,6 +64,7 @@ void SRPPBottomToolBox::Construct(const FArguments& InArgs)
 			SNew(SButton)
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Top)
+			.OnClicked(this, &SRPPBottomToolBox::TogglePlay)
 			.Text(FText::FromString(TEXT("Play/Pause")))
 		]
 	];
@@ -67,9 +72,30 @@ void SRPPBottomToolBox::Construct(const FArguments& InArgs)
 
 }
 
-void SRPPBottomToolBox::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+FReply SRPPBottomToolBox::TogglePlay()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Play/Pause TextValue: %i\n"), NewValue);
+
+	if (RPPMain)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Play/Pause TextValue: %0.2f\n"), RPPMain->AudioCursor);
+		RPPMain->TogglePlay();
+	}
+
+	return FReply::Handled();
 }
+
+void SRPPBottomToolBox::HandleOnSliderChanged(float InFloat)
+{
+	if (RPPMain)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Play/Pause TextValue: %0.2f\n"), RPPMain->AudioCursor);
+		PlaybackRateText.Get()->SetText(FString("Playback Speed: ").Append(FString::SanitizeFloat(InFloat)));
+		RPPMain->ChangePlaybackSpeed(InFloat);
+	}
+}
+
+
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

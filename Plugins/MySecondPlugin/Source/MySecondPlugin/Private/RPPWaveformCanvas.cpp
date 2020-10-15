@@ -12,6 +12,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SRPPWaveformCanvas::Construct(const FArguments& InArgs)
 {
+
+
 	ChildSlot
 		[
 			SNew(SBox)
@@ -22,6 +24,10 @@ void SRPPWaveformCanvas::Construct(const FArguments& InArgs)
 				.RenderOpacity(0.0f)
 			]
 		];
+
+
+
+
 }
 
 void SRPPWaveformCanvas::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
@@ -55,7 +61,7 @@ int32 SRPPWaveformCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& Allot
 	);
 
 
-	return   SCompoundWidget::OnPaint(Args, AllottedGeometry, MyClippingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	return SCompoundWidget::OnPaint(Args, AllottedGeometry, MyClippingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 }
 
 /**
@@ -67,8 +73,6 @@ void SRPPWaveformCanvas::UpperBorderSize()
 
 	FVector2D ContentSize = GetCachedGeometry().GetAbsoluteSize();
 
-	
-	
 
 	BoarderBox.Empty();
 
@@ -93,6 +97,8 @@ void SRPPWaveformCanvas::UpperBorderSize()
 	BoarderBox.Add(BorderLowerRight);
 	BoarderBox.Add(BorderLowerLeft);
 	BoarderBox.Add(BorderUpperLeft);
+
+
 
 
 }

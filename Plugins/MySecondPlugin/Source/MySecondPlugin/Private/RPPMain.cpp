@@ -20,7 +20,6 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SRPPMain::Construct(const FArguments& InArgs)
 {
 	SetVisibility(EVisibility::SelfHitTestInvisible);
-	Initilization();
 	ChildSlot
 		[
 			SNew(SOverlay)
@@ -36,8 +35,12 @@ void SRPPMain::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			[
 				SAssignNew(RPPMainCanvas, SRPPMainCanvas)
+				.RhythmPlatformingPluginMain(this)
 			]
 		];
+
+	Initilization();
+
 }
 
 void SRPPMain::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
@@ -47,16 +50,17 @@ void SRPPMain::Tick(const FGeometry& AllottedGeometry, const double InCurrentTim
 
 	//update look at
 	{
+		if ((AudioComponent->bIsPaused) && (AudioPercentage <= 1))
+		{
+			AudioCursor = (EditorViewportClient->GetViewLocation().X - CameraStartingLocation.X) / PluginManagerObject->RunningSpeed;
+			AudioPercentage = AudioCursor / AudioDuration;
+		}
 
-		AudioCursor = (EditorViewportClient->GetViewLocation().X - CameraStartingLocation.X) / PluginManagerObject->RunningSpeed;
-		AudioPercentage = AudioCursor / AudioDuration;
-		SnaplineCursor = (AudioPercentage * URPPUtility::DataDrawArray.Num()) / 5;
-
-		UE_LOG(LogTemp, Warning, TEXT("ViewLocationX: %.02f"), EditorViewportClient->GetViewLocation().X);
-		UE_LOG(LogTemp, Warning, TEXT("AudioCursor: %.02f"), AudioCursor);
-		UE_LOG(LogTemp, Warning, TEXT("AudioPercentage: %.02f"), AudioPercentage);
-		UE_LOG(LogTemp, Warning, TEXT("SnaplineCursor: %i"), SnaplineCursor);
-
+		SnaplineCursor = (AudioPercentage * URPPUtility::DataDrawArray.Num());
+		//UE_LOG(LogTemp, Warning, TEXT("ViewLocationX: %.02f"), EditorViewportClient->GetViewLocation().X);
+		//UE_LOG(LogTemp, Warning, TEXT("AudioCursor: %.02f"), AudioCursor);
+		//UE_LOG(LogTemp, Warning, TEXT("AudioPercentage: %.02f"), AudioPercentage);
+		//UE_LOG(LogTemp, Warning, TEXT("SnaplineCursor: %i"), SnaplineCursor);
 		UpdateCamaraLookAt();
 	}
 
@@ -75,16 +79,50 @@ void SRPPMain::UpdateCamaraLookAt()
 		URPPUtility::RawDrawArrayToDrawArray(SnaplineCursor, 20000 + SnaplineCursor);
 
 		EditorViewportClient->SetViewLocation(FVector(CameraStartingLocation.X + Delta, newLookAt.Y, newLookAt.Z));
+
+		//if (RPPMainCanvas)
+		//{
+		//	RPPMainCanvas->SetSnapLine();
+		//}
+
 	}
 }
 
+void SRPPMain::HandleOnAudioPlaybackPercentNative(const UAudioComponent* InAudioComponent, const USoundWave* PlayingSoundWave, const float PlaybackPercent)
+{
+	//this API returns the playback percent SINCE LAST PLAY/PAUSE
+	//e.g. the playback percent resets to 0 whenever paused
+
+	if (!InAudioComponent->bIsPaused)    //
+	{
+		AudioPercentage = PlaybackPercent + LastPausePercentage;
+		AudioCursor = AudioPercentage * AudioDuration;
+	}
+	else
+	{
+		LastPausePercentage = AudioPercentage;
+	}
+
+	//float PlaybackTime = AudioPercentage * AudioDuration;
+	//float PlayerLocation = PlaybackTime * (float)PlayerRunningSpeed;
+	//UE_LOG(LogTemp, Warning, TEXT("Percent: %s, PlaybackTime: %s"), *FString::SanitizeFloat(AudioPercentage), *FString::SanitizeFloat(PlaybackTime));
+}
+
+void SRPPMain::ChangePlaybackSpeed(float InFloat)
+{
+	if (AudioComponent)
+	{
+		AudioComponent->SetPaused(true);
+		AudioComponent->SetPitchMultiplier(InFloat);
+		return;
+	}
+	UE_LOG(LogTemp, Error, TEXT("AudioComponent not valid from SRPPMain::ChangePlaybackSpeed"));
+	return;
+}
+
+
 void SRPPMain::Initilization()
 {
-	//init variables
-	{
-		AudioCursor = 0.f;
-		CameraStartingLocation = FVector(0,0,0);
-	}
 
 	//other init
 	EditorViewportClient = (FEditorViewportClient*)GEditor->GetActiveViewport()->GetClient();
@@ -109,6 +147,9 @@ void SRPPMain::Initilization()
 					{
 						AudioDuration = SoundWave->Duration;
 						//RPPUtil = NewObject<URPPUtility>();
+						AudioComponent = PluginManagerObject->PluginAudioPlayer;
+						AudioComponent->SetPaused(true);
+						AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
 						ProcessSoundWave(SoundWave);
 					}
 					ResetViewport();
@@ -140,6 +181,24 @@ void SRPPMain::ResetViewport()
 	}
 
 
+}
+
+void SRPPMain::TogglePlay()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Play/Pause\n"));
+
+	if (AudioComponent)
+	{
+		if (AudioComponent->bIsPaused)
+		{
+			AudioComponent->Play(AudioCursor);
+			AudioComponent->SetPaused(!AudioComponent->bIsPaused);
+		}
+		else
+		{
+			AudioComponent->SetPaused(!AudioComponent->bIsPaused);
+		}
+	}
 }
 
 

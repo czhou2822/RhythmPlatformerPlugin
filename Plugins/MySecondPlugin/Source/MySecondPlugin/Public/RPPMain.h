@@ -34,25 +34,37 @@ private:
 
 	class FEditorViewportClient* EditorViewportClient;
 
-	float AudioCursor;    //playtime of the track, in seconds
+	class UAudioComponent* AudioComponent;
 
-	float AudioDuration;
+	float AudioDuration = 0.f;
 
-	float AudioPercentage;
+	float AudioPercentage = 0.f;
 
-	int32 SnaplineCursor; //index of the RawDrawArray. 
+	float AudioCursor = 0.f;    //playtime of the track, in seconds
 
-	FVector CameraStartingLocation;
+	bool bIsPlaying = false;      //is track playing
+
+	float LastPausePercentage = 0.f;  //played percentage since last paused
+
+	int32 SnaplineCursor = 0; //index of the RawDrawArray. 
+
+	FVector CameraStartingLocation = FVector(0, 0, 0);
+
+
+
 
 public:
-	TSharedPtr<SRPPButtonVBox> RPPButtonVBox;
+	TSharedPtr<class SRPPButtonVBox> RPPButtonVBox;
 
-	TSharedPtr<SRPPMainCanvas> RPPMainCanvas;
+	TSharedPtr<class SRPPMainCanvas> RPPMainCanvas;
 
 
 private:
 	//called every frame
 	void UpdateCamaraLookAt();
+
+	void HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
+
 
 public:
 	
@@ -67,6 +79,11 @@ public:
 
 	//reset viewport, going back to the beginning of the level
 	void ResetViewport();
+
+	void TogglePlay();
+
+	void ChangePlaybackSpeed(float InFloat);
+
 
 
 };

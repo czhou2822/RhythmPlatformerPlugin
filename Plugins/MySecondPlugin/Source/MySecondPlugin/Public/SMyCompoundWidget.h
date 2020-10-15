@@ -19,7 +19,7 @@ class JsonObject;
 class AMySecondPluginManager;
 class UMySecondPluginTextRW;
 
-enum EDrawType { Header, Data, Footer };
+//enum EDrawType { Header, Data, Footer };
 
 /**
  * 

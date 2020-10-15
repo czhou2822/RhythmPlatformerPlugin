@@ -13,6 +13,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SRPPMainCanvas::Construct(const FArguments& InArgs)
 {
 	SetVisibility(EVisibility::SelfHitTestInvisible);
+	RPPMain = InArgs._RhythmPlatformingPluginMain;
 	ChildSlot
 		[
 			SNew(SOverlay)
@@ -24,7 +25,7 @@ void SRPPMainCanvas::Construct(const FArguments& InArgs)
 				+ SVerticalBox::Slot()
 				.HAlign(HAlign_Fill)
 				.VAlign(VAlign_Fill)
-				.Padding(0.0f,50.f,0.0f,0.0f)
+				.Padding(0.0f,TopPadding,0.0f,0.0f)
 				[
 					SAssignNew(RPPWaveformCanvas, SRPPWaveformCanvas)
 					.Visibility(EVisibility::SelfHitTestInvisible)
@@ -36,18 +37,47 @@ void SRPPMainCanvas::Construct(const FArguments& InArgs)
 				[
 					SAssignNew(RPPBottomToolBox, SRPPBottomToolBox)
 					.Visibility(EVisibility::Visible)
+					.TestValue(30)
+					.RhythmPlatformingPluginMain(RPPMain)
 
 				]
-
 			]
-
-
 		];
+
+
 }
 
 void SRPPMainCanvas::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
+	SetSnapLine();
 }
 
+int32 SRPPMainCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyClippingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+
+
+	FSlateDrawElement::MakeLines(OutDrawElements,    //render snapline 
+		LayerId,
+		AllottedGeometry.ToPaintGeometry(),
+		SnapLine,
+		ESlateDrawEffect::None,
+		FLinearColor::Red,
+		true,
+		2.f
+	);
+
+
+	return SCompoundWidget::OnPaint(Args, AllottedGeometry, MyClippingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+}
+
+void SRPPMainCanvas::SetSnapLine()
+{
+	FVector2D ContentSize = GetCachedGeometry().GetAbsoluteSize();
+	//FVector2D ContentSize = GetDesiredSize();
+
+	SnapLine.Empty();
+	SnapLine.Add(FVector2D(ContentSize.X / 2 , TopPadding));
+	SnapLine.Add(FVector2D(ContentSize.X / 2, ContentSize.Y));
+}
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
