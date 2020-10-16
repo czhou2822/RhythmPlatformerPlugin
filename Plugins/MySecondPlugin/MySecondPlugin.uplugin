@@ -16,7 +16,7 @@
 	"Modules": [
 		{
 			"Name": "MySecondPlugin",
-			"Type": "Editor",
+			"Type": "Developer",
 			"LoadingPhase": "Default"
 		}
 	]

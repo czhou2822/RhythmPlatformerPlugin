@@ -10,8 +10,8 @@ public class MyProject : ModuleRules
 
 		PrecompileForTargets = PrecompileTargetsType.Any;
 
-//        PrivateDependencyModuleNames.AddRange(new string[] { "MySecondPlugin" });
+ //       PrivateDependencyModuleNames.AddRange(new string[] { "MySecondPlugin" });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "MediaAssets", "Paper2D", "MediaUtils" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Paper2D" });
 	}
 }

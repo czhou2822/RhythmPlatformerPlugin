@@ -17,7 +17,9 @@ TArray<FVector2D> URPPUtility::DrawArray;	//DrawArray
 TArray<float> URPPUtility::BeatRawArray{ 0.f, 1.f, 2.f, 3.f, 4.f,5.f, 6.f, 7.f, 8.f, 9.f, 10.f };    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
 TArray<FVector2D> URPPUtility::BeatDrawArray;	//BeatArray
 
-UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = NewObject<UMySecondPluginTextRW>();
+//UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = NewObject<UMySecondPluginTextRW>();
+UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = nullptr;
+
 FEditorViewportClient* URPPUtility::EditorViewportClient = nullptr;
 
 
