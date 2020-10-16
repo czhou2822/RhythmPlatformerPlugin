@@ -90,7 +90,7 @@ void SRPPBottomToolBox::HandleOnSliderChanged(float InFloat)
 	if (RPPMain)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Play/Pause TextValue: %0.2f\n"), RPPMain->AudioCursor);
-		PlaybackRateText.Get()->SetText(FString("Playback Speed: ").Append(FString::SanitizeFloat(InFloat)));
+		PlaybackRateText.Get()->SetText(FString("Playback Speed: ").Append(FString::SanitizeFloat(InFloat, 2)));
 		RPPMain->ChangePlaybackSpeed(InFloat);
 	}
 }

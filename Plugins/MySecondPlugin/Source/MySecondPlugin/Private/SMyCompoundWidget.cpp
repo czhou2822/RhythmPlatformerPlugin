@@ -570,18 +570,12 @@ FReply SMyCompoundWidget::LoadLevel()
 {
 	FString outString;
 	MySecondPluginTextRW->LoadLevelInfo(TEXT("test.txt"), outString);
-
-	
-
 	return FReply::Handled();
 }
 
 FReply SMyCompoundWidget::SaveLevel()
 {
-
-
 	MySecondPluginTextRW->SaveLevelInfo("test.txt");
-
 	return FReply::Handled();
 }
 

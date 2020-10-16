@@ -8,8 +8,6 @@
 #include "Sound/SoundWave.h"
 
 //user include
-
-
 #include "RPPUtility.generated.h"
 
 /**
@@ -37,14 +35,14 @@ public:
 
 	static TArray<FVector2D> DrawArray;	//DrawArray
 
-
-
 	//beat grid-related arrays
 	static TArray<float> BeatRawArray;    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
 	
 	static TArray<FVector2D> BeatDrawArray;	//BeatArray
 
+	static class UMySecondPluginTextRW* MySecondPluginTextRW;
 
+	static FEditorViewportClient* EditorViewportClient;
 
 
 
@@ -54,6 +52,9 @@ private:
 
 
 public:
+	URPPUtility();
+
+	static void SetEditorViewportClient(FEditorViewportClient* InEditorViewportClient);
 
 	static void SetDataRawArray(USoundWave* SoundWave);
 
@@ -68,5 +69,11 @@ public:
 	e.g., if bpm = 60, RawBeatArray = {0,1,2,3}
 	*/
 	static void CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime = 0.0f);
+
+	static void LoadLevel();
+
+    static void SaveLevel();
+
+	static void AddTimestamp(float InAudioCursor);
 
 };

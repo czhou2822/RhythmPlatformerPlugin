@@ -4,7 +4,7 @@
 
 //user includes
 #include "RPPButtonVBox.h"
-
+#include "RPPUtility.h"
 
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -14,6 +14,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SRPPButtonVBox::Construct(const FArguments& InArgs)
 {
+	RPPMain = InArgs._RhythmPlatformingPluginMain;
 	ChildSlot
 		[
 			SNew(SVerticalBox)
@@ -22,6 +23,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this,&SRPPButtonVBox::BackToTop)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -34,6 +36,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this, &SRPPButtonVBox::ReloadWave)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -46,6 +49,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this, &SRPPButtonVBox::MarkTimeStamp)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -70,6 +74,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this, &SRPPButtonVBox::SaveLevel)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -82,6 +87,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this, &SRPPButtonVBox::LoadLevel)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -116,9 +122,68 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 
 }
 
-void SRPPButtonVBox::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+FReply SRPPButtonVBox::BackToTop()
 {
+	if (RPPMain)
+	{
+		RPPMain->ResetViewport();
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
+FReply SRPPButtonVBox::ReloadWave()
+{
+	if (RPPMain)
+	{
+		RPPMain->Initilization();
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
+FReply SRPPButtonVBox::MarkTimeStamp()
+{
+	if (RPPMain)
+	{
+		URPPUtility::AddTimestamp(RPPMain->AudioCursor);
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
+
+FReply SRPPButtonVBox::LoadLevel()
+{
+	URPPUtility::LoadLevel();
+	return FReply::Handled();
+}
+
+FReply SRPPButtonVBox::SaveLevel()
+{
+	URPPUtility::SaveLevel();
+	return FReply::Handled();
+
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+

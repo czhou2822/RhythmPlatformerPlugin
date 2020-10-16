@@ -6,23 +6,8 @@
 	"events": [
 		{
 			"eventFrameStamp": 0,
-			"eventTime": 1.8633333444595337,
+			"eventTime": 1.3300249576568604,
 			"eventName": "MySecondPluginTimestamp_0"
-		},
-		{
-			"eventFrameStamp": 0,
-			"eventTime": 4.0466666221618652,
-			"eventName": "MySecondPluginTimestamp_1"
-		},
-		{
-			"eventFrameStamp": 0,
-			"eventTime": 6.0799999237060547,
-			"eventName": "MySecondPluginTimestamp_2"
-		},
-		{
-			"eventFrameStamp": 0,
-			"eventTime": 7.8899998664855957,
-			"eventName": "MySecondPluginTimestamp_3"
 		}
 	]
 }

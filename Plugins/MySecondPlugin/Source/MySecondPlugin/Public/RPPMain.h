@@ -72,6 +72,8 @@ private:
 
 	void HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
 
+	void ProcessSoundWave(USoundWave* InSoundWave);
+
 
 public:
 	
@@ -82,14 +84,14 @@ public:
 	//plugin init
 	void Initilization();
 
-	void ProcessSoundWave(USoundWave* InSoundWave);
-
 	//reset viewport, going back to the beginning of the level
 	void ResetViewport();
 
 	void TogglePlay();
 
 	void ChangePlaybackSpeed(float InFloat);
+
+	
 
 
 

@@ -14,6 +14,7 @@
 
 
 
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 
@@ -29,6 +30,7 @@ void SRPPMain::Construct(const FArguments& InArgs)
 			.Padding(FMargin(10.0,50.0,0.0,0.0))
 			[
 				SAssignNew(RPPButtonVBox, SRPPButtonVBox)
+				.RhythmPlatformingPluginMain(this)
 			]
 			+ SOverlay::Slot()
 			.HAlign(HAlign_Center)
@@ -168,6 +170,8 @@ void SRPPMain::ProcessSoundWave(USoundWave* InSoundWave)
 	URPPUtility::RawDataArrayToRawDrawArray(5);  //bucket size
 	URPPUtility::RawDrawArrayToDrawArray(0, 20000);  //start, end
 	URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, InSoundWave->Duration, PluginManagerObject->BeatStartingTime);
+	URPPUtility::SetEditorViewportClient(EditorViewportClient);
+
 }
 
 void SRPPMain::ResetViewport()

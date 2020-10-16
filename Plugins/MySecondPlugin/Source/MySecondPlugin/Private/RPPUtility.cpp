@@ -1,5 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "EditorViewportClient.h"
+
+
 #include "RPPUtility.h"
+#include "MySecondPluginTextRW.h"
+#include "MySecondPluginTimestamp.h"
+
 
 
 TArray<float> URPPUtility::DataRawArray;    //Raw data from wave file   
@@ -9,11 +17,20 @@ TArray<FVector2D> URPPUtility::DrawArray;	//DrawArray
 TArray<float> URPPUtility::BeatRawArray{ 0.f, 1.f, 2.f, 3.f, 4.f,5.f, 6.f, 7.f, 8.f, 9.f, 10.f };    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
 TArray<FVector2D> URPPUtility::BeatDrawArray;	//BeatArray
 
-//URPPUtility::URPPUtility()
-//{
-////	Super::UObject();
-//}
+UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = NewObject<UMySecondPluginTextRW>();
+FEditorViewportClient* URPPUtility::EditorViewportClient = nullptr;
 
+
+URPPUtility::URPPUtility()
+{
+}
+void URPPUtility::SetEditorViewportClient(FEditorViewportClient* InEditorViewportClient)
+{
+	if (InEditorViewportClient)
+	{
+		EditorViewportClient = InEditorViewportClient;
+	}
+}
 /**
  Extract data from USoundWave and put them into RawDataArray
  @param Soundwave, the Soundwave pointer
@@ -56,6 +73,8 @@ TArray<float> URPPUtility::WaveToRawDataArray(USoundWave* SoundWave)
 
 	return Output;
 }
+
+
 
 void URPPUtility::SetDataRawArray(USoundWave* SoundWave)
 {
@@ -244,5 +263,30 @@ void URPPUtility::CalculateRawBeatArray(const float& InBPM, const float& InAudio
 		NextBeatTime += BeatInveral;
 	}
 	return;
+}
+
+void URPPUtility::LoadLevel()
+{
+	FString outString;
+	MySecondPluginTextRW->LoadLevelInfo(TEXT("test.txt"), outString);
+}
+
+void URPPUtility::SaveLevel()
+{
+	MySecondPluginTextRW->SaveLevelInfo("test.txt");
+}
+
+void URPPUtility::AddTimestamp(float InAudioCursor)
+{
+	if (EditorViewportClient)
+	{
+		AMySecondPluginTimestamp* newTimeStamp = EditorViewportClient->GetWorld()->SpawnActor<AMySecondPluginTimestamp>(FVector(EditorViewportClient->GetViewLocation().X, 0, EditorViewportClient->GetViewLocation().Z), FRotator::ZeroRotator);
+
+		FPlatformerEvent NewEvent;
+		NewEvent.EventName = newTimeStamp->GetName();
+		NewEvent.EventTime = InAudioCursor;
+
+		MySecondPluginTextRW->AddNewEvent(NewEvent);
+	}
 
 }
