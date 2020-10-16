@@ -14,12 +14,14 @@
 #include "MySecondPluginTextRW.h"
 #include "EditorViewportClient.h"
 
+#include "RPPUtility.h"
+
+
 
 class JsonObject;
 class AMySecondPluginManager;
 class UMySecondPluginTextRW;
 
-//enum EDrawType { Header, Data, Footer };
 
 /**
  * 

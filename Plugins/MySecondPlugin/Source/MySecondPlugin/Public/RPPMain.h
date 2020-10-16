@@ -28,6 +28,7 @@ public:
 
 private:
 
+
 	class AMySecondPluginManager* PluginManagerObject;
 
 	class URPPUtility* RPPUtil;
@@ -36,17 +37,17 @@ private:
 
 	class UAudioComponent* AudioComponent;
 
-	float AudioDuration = 0.f;
-
 	float AudioPercentage = 0.f;
-
-	float AudioCursor = 0.f;    //playtime of the track, in seconds
 
 	bool bIsPlaying = false;      //is track playing
 
 	float LastPausePercentage = 0.f;  //played percentage since last paused
 
 	int32 SnaplineCursor = 0; //index of the RawDrawArray. 
+
+	const int32 NUMBER_OF_LINES_IN_WINDOW = 20000; //how many lines in waveform
+
+	int32 ZoomFactor = 5;      //how many samples in each bucket, for example, if this is 32, RawDrawArray takes ONE peak value out of 32 in RawDataArray
 
 	FVector CameraStartingLocation = FVector(0, 0, 0);
 
@@ -57,6 +58,12 @@ public:
 	TSharedPtr<class SRPPButtonVBox> RPPButtonVBox;
 
 	TSharedPtr<class SRPPMainCanvas> RPPMainCanvas;
+
+	float AudioCursor = 0.f;    //playtime of the track, in seconds
+
+	float WindowLength = 0.f;	//how many time repersented in width 
+
+	float AudioDuration = 0.f;
 
 
 private:

@@ -6,7 +6,8 @@ TArray<float> URPPUtility::DataRawArray;    //Raw data from wave file
 TArray<float> URPPUtility::DataDrawArray;   //RawDrawArray processed from RawDataArray, contain (RawDataArray.size()/bucketsize) elements
 TArray<FVector2D> URPPUtility::DrawArray;	//DrawArray
 
-
+TArray<float> URPPUtility::BeatRawArray{ 0.f, 1.f, 2.f, 3.f, 4.f,5.f, 6.f, 7.f, 8.f, 9.f, 10.f };    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
+TArray<FVector2D> URPPUtility::BeatDrawArray;	//BeatArray
 
 //URPPUtility::URPPUtility()
 //{
@@ -221,4 +222,27 @@ void URPPUtility::RawDrawArrayToDrawArray(int Start, const int End)
 		XCord += XIncrement;
 		Steps++;
 	}
+}
+
+
+/*
+calculatess beat array. e.g. if bpm = 60. BeatRawArray = {0,1,2,3 ...}
+*/
+void URPPUtility::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime)
+{
+	BeatRawArray.Empty();
+
+	BeatRawArray.Add(0.f);
+
+	float NextBeatTime = 0.f + InBeatStartingTime;
+
+	float BeatInveral = 60.f / InBPM;
+
+	while (NextBeatTime <= InAudioDuation)
+	{
+		BeatRawArray.Add(NextBeatTime);
+		NextBeatTime += BeatInveral;
+	}
+	return;
+
 }

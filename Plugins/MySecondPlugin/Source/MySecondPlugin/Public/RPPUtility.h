@@ -25,12 +25,6 @@ class MYSECONDPLUGIN_API URPPUtility : public UObject
 
 private:
 
-	//
-
-	//URPPUtility(URPPUtility const&) = delete;
-
-	//void operator=(URPPUtility const&) = delete;
-
 	static const int32 NUMBER_OF_LINES_IN_WINDOW = 20000;
 
 public:
@@ -45,6 +39,14 @@ public:
 
 
 
+	//beat grid-related arrays
+	static TArray<float> BeatRawArray;    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
+	
+	static TArray<FVector2D> BeatDrawArray;	//BeatArray
+
+
+
+
 
 
 private:
@@ -52,7 +54,6 @@ private:
 
 
 public:
-	//URPPUtility();
 
 	static void SetDataRawArray(USoundWave* SoundWave);
 
@@ -61,5 +62,11 @@ public:
 	static void RawDataArrayToRawDrawArray(int BucketSize);
 
 	static void RawDrawArrayToDrawArray(const int Start, const int End);
+
+	/*
+	generates elements for RawBeatArray
+	e.g., if bpm = 60, RawBeatArray = {0,1,2,3}
+	*/
+	static void CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime = 0.0f);
 
 };

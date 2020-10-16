@@ -29,6 +29,7 @@ void SRPPMainCanvas::Construct(const FArguments& InArgs)
 				[
 					SAssignNew(RPPWaveformCanvas, SRPPWaveformCanvas)
 					.Visibility(EVisibility::SelfHitTestInvisible)
+					.RhythmPlatformingPluginMain(RPPMain)
 				]
 
 				+ SVerticalBox::Slot()

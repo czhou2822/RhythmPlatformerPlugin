@@ -16,6 +16,8 @@ class MYSECONDPLUGIN_API SRPPWaveformCanvas : public SCompoundWidget
 public:
 	SLATE_BEGIN_ARGS(SRPPWaveformCanvas)
 	{}
+	SLATE_ARGUMENT(class SRPPMain*, RhythmPlatformingPluginMain)
+
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -26,6 +28,7 @@ private:
 	//this array gets passed into OnPaint
 	TArray<FVector2D> DrawArray;
 
+	class SRPPMain* RPPMain;
 
 
 public:
@@ -54,6 +57,10 @@ public:
 	//update the white border
 	void UpperBorderSize();
 
+	//calculates BeatDrawArray
+	void GetBeatGrid(float CurrentCursor);
 
+	//calls make line using BeatDrawArray
+	void DrawBeatGrid(float CurrentCursor, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 LayerId) const;
 
 };
