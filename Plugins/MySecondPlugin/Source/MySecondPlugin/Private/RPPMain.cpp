@@ -122,6 +122,15 @@ void SRPPMain::ChangePlaybackSpeed(float InFloat)
 	return;
 }
 
+void SRPPMain::SetCurrentAsBeatStartingTime()
+{
+	if (PluginManagerObject)
+	{
+		PluginManagerObject->BeatStartingTime = AudioCursor;
+		URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, AudioDuration, PluginManagerObject->BeatStartingTime);
+	}
+}
+
 
 void SRPPMain::Initilization()
 {
@@ -148,7 +157,6 @@ void SRPPMain::Initilization()
 					if (USoundWave* SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound)
 					{
 						AudioDuration = SoundWave->Duration;
-						//RPPUtil = NewObject<URPPUtility>();
 						AudioComponent = PluginManagerObject->PluginAudioPlayer;
 						AudioComponent->SetPaused(true);
 						AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
@@ -167,11 +175,11 @@ void SRPPMain::Initilization()
 void SRPPMain::ProcessSoundWave(USoundWave* InSoundWave)
 {
 	URPPUtility::SetDataRawArray(InSoundWave);
-	URPPUtility::RawDataArrayToRawDrawArray(5);  //bucket size
-	URPPUtility::RawDrawArrayToDrawArray(0, 20000);  //start, end
+	URPPUtility::RawDataArrayToRawDrawArray(ZoomFactor);  //bucket size
+	URPPUtility::RawDrawArrayToDrawArray(0, NUMBER_OF_LINES_IN_WINDOW);  //start, end
 	URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, InSoundWave->Duration, PluginManagerObject->BeatStartingTime);
 	URPPUtility::SetEditorViewportClient(EditorViewportClient);
-
+	URPPUtility::SetPluginManager(PluginManagerObject);
 }
 
 void SRPPMain::ResetViewport()
@@ -185,8 +193,6 @@ void SRPPMain::ResetViewport()
 		CameraStartingLocation = FVector(PluginManagerObject->GetActorLocation().X, CameraStartingLocation.Y, CameraStartingLocation.Z);
 		EditorViewportClient->SetViewLocation(CameraStartingLocation);
 	}
-
-
 }
 
 void SRPPMain::TogglePlay()

@@ -7,6 +7,7 @@
 #include "RPPUtility.h"
 #include "MySecondPluginTextRW.h"
 #include "MySecondPluginTimestamp.h"
+#include "MySecondPluginManager.h"
 
 
 
@@ -22,9 +23,13 @@ UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = nullptr;
 
 FEditorViewportClient* URPPUtility::EditorViewportClient = nullptr;
 
+AMySecondPluginManager* URPPUtility::MySecondPluginManager = nullptr;
+
 
 URPPUtility::URPPUtility()
 {
+	URPPUtility::MySecondPluginTextRW = NewObject<UMySecondPluginTextRW>();
+
 }
 void URPPUtility::SetEditorViewportClient(FEditorViewportClient* InEditorViewportClient)
 {
@@ -291,4 +296,9 @@ void URPPUtility::AddTimestamp(float InAudioCursor)
 		MySecondPluginTextRW->AddNewEvent(NewEvent);
 	}
 
+}
+
+void URPPUtility::SetPluginManager(AMySecondPluginManager* InMySecondPluginManager)
+{
+	MySecondPluginManager = InMySecondPluginManager;
 }

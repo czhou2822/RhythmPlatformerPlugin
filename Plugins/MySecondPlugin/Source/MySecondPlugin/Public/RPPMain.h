@@ -91,7 +91,7 @@ public:
 
 	void ChangePlaybackSpeed(float InFloat);
 
-	
+	void SetCurrentAsBeatStartingTime();
 
 
 

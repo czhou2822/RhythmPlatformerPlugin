@@ -10,8 +10,6 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 
-
-
 void SRPPButtonVBox::Construct(const FArguments& InArgs)
 {
 	RPPMain = InArgs._RhythmPlatformingPluginMain;
@@ -112,6 +110,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this, &SRPPButtonVBox::ChangeBeatStartingTime)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -165,7 +164,15 @@ FReply SRPPButtonVBox::SaveLevel()
 
 }
 
-
+FReply SRPPButtonVBox::ChangeBeatStartingTime()
+{
+	if (RPPMain)
+	{
+		RPPMain->SetCurrentAsBeatStartingTime();
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
+}
 
 
 

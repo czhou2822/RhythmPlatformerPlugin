@@ -42,6 +42,8 @@ public:
 
 	static class UMySecondPluginTextRW* MySecondPluginTextRW;
 
+	static class AMySecondPluginManager* MySecondPluginManager;
+
 	static FEditorViewportClient* EditorViewportClient;
 
 
@@ -75,5 +77,7 @@ public:
     static void SaveLevel();
 
 	static void AddTimestamp(float InAudioCursor);
+
+	static void SetPluginManager(AMySecondPluginManager* InMySecondPluginManager);
 
 };

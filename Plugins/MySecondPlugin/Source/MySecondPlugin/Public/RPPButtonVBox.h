@@ -45,7 +45,7 @@ private:
 
 	//FReply RefreshRunningSpeed();
 
-	//FReply ChangeBeatStartingTime();
+	FReply ChangeBeatStartingTime();
 
 public:
 	void Construct(const FArguments& InArgs);
