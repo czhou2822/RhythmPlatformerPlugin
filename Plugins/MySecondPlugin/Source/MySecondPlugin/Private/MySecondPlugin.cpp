@@ -80,10 +80,30 @@ void FMySecondPluginModule::PluginButtonClicked()
 	//UE_LOG(LogTemp, Warning, TEXT("IsActivated: %s"), bPluginIsActivated ? "1" : "0");
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	RPPMain = SNew(SRPPMain);
 
-	LevelEditorModule.GetFirstActiveViewport()->AddOverlayWidget(RPPMain.ToSharedRef());
-	bSMyWidgetInitilized = true;
+
+	int32 Width = GEditor->GetActiveViewport()->GetSizeXY().X;
+
+	int32 Height = GEditor->GetActiveViewport()->GetSizeXY().Y;
+
+	UE_LOG(LogTemp, Warning, TEXT("Width: %i, Height: %i"), Width, Height);
+
+	if (RPPMain == nullptr)
+	{
+		RPPMain = SNew(SRPPMain)
+			.RPPWidth(Width * 0.8)
+			.RPPHeight(Height * 0.4);
+
+		LevelEditorModule.GetFirstActiveViewport()->AddOverlayWidget(RPPMain.ToSharedRef());
+		bSMyWidgetInitilized = true;
+	}
+	else
+	{
+		LevelEditorModule.GetFirstActiveViewport()->RemoveOverlayWidget(RPPMain.ToSharedRef());
+		RPPMain.Reset();
+	}
+
+
 
 
 }

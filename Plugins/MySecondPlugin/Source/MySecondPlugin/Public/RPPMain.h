@@ -19,14 +19,19 @@
 class MYSECONDPLUGIN_API SRPPMain : public SCompoundWidget
 {
 public:
+
 	SLATE_BEGIN_ARGS(SRPPMain)
 	{}
+	SLATE_ARGUMENT(float, RPPWidth)
+	SLATE_ARGUMENT(float, RPPHeight)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 
 
 private:
+
+
 
 
 	class AMySecondPluginManager* PluginManagerObject;
@@ -72,8 +77,6 @@ private:
 
 	void HandleOnAudioPlaybackPercentNative(const class UAudioComponent* AudioComponent, const class USoundWave* PlayingSoundWave, const float PlaybackPercent);
 
-	void ProcessSoundWave(USoundWave* InSoundWave);
-
 
 public:
 	
@@ -93,6 +96,7 @@ public:
 
 	void SetCurrentAsBeatStartingTime();
 
-
+	//process soundwave in PluginObject->audiocomponent
+	void ProcessSoundWave();
 
 };

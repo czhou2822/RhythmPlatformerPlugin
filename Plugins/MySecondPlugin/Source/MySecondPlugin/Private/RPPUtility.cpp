@@ -25,6 +25,10 @@ FEditorViewportClient* URPPUtility::EditorViewportClient = nullptr;
 
 AMySecondPluginManager* URPPUtility::MySecondPluginManager = nullptr;
 
+int32 URPPUtility::WidgetHeight = 0;
+
+int32 URPPUtility::WidgetWidth = 0;
+
 
 URPPUtility::URPPUtility()
 {
@@ -103,7 +107,17 @@ void URPPUtility::RawDataArrayToRawDrawArray(int BucketSize)
 
 	//float YOffset = Padding + BorderHeight / 2.f;
 
-	float YOffset = 115/2;
+	if (WidgetHeight == 0 || WidgetWidth == 0)
+	{
+		return;
+	}
+
+	//if (DrawArray.Num() != 0)
+	//{
+	//	return;
+	//}
+
+	float YOffset = WidgetHeight/2;
 
 	int InputArrayIndex = 0;
 	int NumberOfBuckets = (DataRawArray.Num() - (DataRawArray.Num() % BucketSize)) / BucketSize;
@@ -118,7 +132,7 @@ void URPPUtility::RawDataArrayToRawDrawArray(int BucketSize)
 
 	//float YScale = BorderHeight / (2 * AbsMax);
 
-	float YScale = 115 / (2 * AbsMax);
+	float YScale = WidgetHeight / (2 * AbsMax);
 
 	for (int i = 0; i < NumberOfBuckets; i++)
 	{
@@ -176,7 +190,7 @@ void URPPUtility::RawDrawArrayToDrawArray(int Start, const int End)
 
 	float XCord = 0.f;										//X  starting cord   //Todo, just change Y, leave X
 
-	float XIncrement = (float)800 / NumberOfSteps;
+	float XIncrement = (float)WidgetWidth / NumberOfSteps;
 
 	int Header = NUMBER_OF_LINES_IN_WINDOW / 2;
 	int Tail = NUMBER_OF_LINES_IN_WINDOW / 2;

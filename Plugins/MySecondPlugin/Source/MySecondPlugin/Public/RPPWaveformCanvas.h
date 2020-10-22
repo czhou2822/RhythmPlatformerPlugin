@@ -25,17 +25,14 @@ public:
 private:
 	TArray<FVector2D> BoarderBox;
 
-	//this array gets passed into OnPaint
-	TArray<FVector2D> DrawArray;
-
 	class SRPPMain* RPPMain;
 
 
 public:
 
-	float CanvasWidth;
+	float BorderWidth = 0.f;
 
-	float CanvasHeight;
+	float BorderHeight = 0.f;
 
 
 public:

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RPPMainCanvas.h"
-
+#include "RPPUtility.h"
 
 
 
@@ -38,7 +38,6 @@ void SRPPMainCanvas::Construct(const FArguments& InArgs)
 				[
 					SAssignNew(RPPBottomToolBox, SRPPBottomToolBox)
 					.Visibility(EVisibility::Visible)
-					.TestValue(30)
 					.RhythmPlatformingPluginMain(RPPMain)
 
 				]
@@ -74,7 +73,7 @@ int32 SRPPMainCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 void SRPPMainCanvas::SetSnapLine()
 {
 	FVector2D ContentSize = GetCachedGeometry().GetAbsoluteSize();
-	//FVector2D ContentSize = GetDesiredSize();
+
 
 	SnapLine.Empty();
 	SnapLine.Add(FVector2D(ContentSize.X / 2 , TopPadding));

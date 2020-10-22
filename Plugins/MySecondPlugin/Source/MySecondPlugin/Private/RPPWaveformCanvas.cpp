@@ -25,8 +25,8 @@ void SRPPWaveformCanvas::Construct(const FArguments& InArgs)
 	ChildSlot
 		[
 			SNew(SBox)
-			.WidthOverride(800)
-			.HeightOverride(200)
+			.WidthOverride(URPPUtility::WidgetWidth)
+			.HeightOverride(URPPUtility::WidgetHeight)
 			[
 				SNew(SImage)
 				.RenderOpacity(0.0f)
@@ -59,15 +59,31 @@ void SRPPWaveformCanvas::UpperBorderSize()
 
 	FVector2D ContentSize = GetCachedGeometry().GetAbsoluteSize();
 
+	if (ContentSize.X == 0 && ContentSize.Y == 0)
+	{
+		return;
+	}
 
+
+	if ((int32)ContentSize.X == URPPUtility::WidgetWidth && (int32)ContentSize.Y == URPPUtility::WidgetHeight)
+	{
+		return;
+	}
+
+	if (URPPUtility::WidgetHeight == 0 && URPPUtility::WidgetWidth == 0)
+	{
+		return;
+	}
 	BoarderBox.Empty();
 
-	float ScaleFactor = 0.3;
+	URPPUtility::WidgetHeight = ContentSize.Y;
+	URPPUtility::WidgetWidth = ContentSize.X;
 
+	BorderWidth = URPPUtility::WidgetWidth;
+	BorderHeight = URPPUtility::WidgetHeight;
 
+	RPPMain->ProcessSoundWave();
 
-	float BorderWidth = ContentSize.X;
-	float BorderHeight = ContentSize.Y;
 
 	FVector2D BorderUpperLeft = FVector2D(0, 0);
 	FVector2D BorderUpperRight = BorderUpperLeft + FVector2D(BorderWidth, 0);

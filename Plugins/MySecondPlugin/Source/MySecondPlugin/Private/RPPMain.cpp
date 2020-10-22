@@ -13,14 +13,17 @@
 
 
 
-
-
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 
 void SRPPMain::Construct(const FArguments& InArgs)
 {
 	SetVisibility(EVisibility::SelfHitTestInvisible);
+
+	URPPUtility::WidgetHeight = InArgs._RPPHeight;
+
+	URPPUtility::WidgetWidth = InArgs._RPPWidth;
+
 	ChildSlot
 		[
 			SNew(SOverlay)
@@ -40,6 +43,17 @@ void SRPPMain::Construct(const FArguments& InArgs)
 				.RhythmPlatformingPluginMain(this)
 			]
 		];
+
+	//if (RPPMainCanvas)
+	//{
+	//	if (RPPMainCanvas->RPPWaveformCanvas)
+	//	{
+	//		FVector2D WidgetSize = RPPMainCanvas->RPPWaveformCanvas->GetTickSpaceGeometry().GetAbsoluteSize();
+	//		UE_LOG(LogTemp, Warning, TEXT("Width: %i, Height: %i"), WidgetSize.X, WidgetSize.Y);
+
+	//	}
+	//}
+
 
 	Initilization();
 
@@ -131,7 +145,6 @@ void SRPPMain::SetCurrentAsBeatStartingTime()
 	}
 }
 
-
 void SRPPMain::Initilization()
 {
 
@@ -160,8 +173,9 @@ void SRPPMain::Initilization()
 						AudioComponent = PluginManagerObject->PluginAudioPlayer;
 						AudioComponent->SetPaused(true);
 						AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
-						ProcessSoundWave(SoundWave);
 						WindowLength = (NUMBER_OF_LINES_IN_WINDOW * ZoomFactor) / ((float)URPPUtility::DataRawArray.Num()) * (float)SoundWave->Duration;
+						ProcessSoundWave();
+
 					}
 					ResetViewport();
 
@@ -172,14 +186,18 @@ void SRPPMain::Initilization()
 	}
 }
 
-void SRPPMain::ProcessSoundWave(USoundWave* InSoundWave)
+void SRPPMain::ProcessSoundWave()
 {
-	URPPUtility::SetDataRawArray(InSoundWave);
-	URPPUtility::RawDataArrayToRawDrawArray(ZoomFactor);  //bucket size
-	URPPUtility::RawDrawArrayToDrawArray(0, NUMBER_OF_LINES_IN_WINDOW);  //start, end
-	URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, InSoundWave->Duration, PluginManagerObject->BeatStartingTime);
-	URPPUtility::SetEditorViewportClient(EditorViewportClient);
-	URPPUtility::SetPluginManager(PluginManagerObject);
+	if (USoundWave* SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound)
+	{
+		URPPUtility::SetDataRawArray(SoundWave);
+		URPPUtility::RawDataArrayToRawDrawArray(ZoomFactor);  //bucket size
+		URPPUtility::RawDrawArrayToDrawArray(0, NUMBER_OF_LINES_IN_WINDOW);  //start, end
+		URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, SoundWave->Duration, PluginManagerObject->BeatStartingTime);
+		URPPUtility::SetEditorViewportClient(EditorViewportClient);
+		URPPUtility::SetPluginManager(PluginManagerObject);
+	}
+
 }
 
 void SRPPMain::ResetViewport()

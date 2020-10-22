@@ -44,6 +44,12 @@ public:
 
 	static class AMySecondPluginManager* MySecondPluginManager;
 
+	static int32 WidgetWidth;
+
+	static int32 WidgetHeight;
+
+
+
 	static FEditorViewportClient* EditorViewportClient;
 
 
