@@ -1,14 +1,29 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "MySecondPluginTimestamp.h"
 #include "components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
+
+#if WITH_EDITOR
+
+#include "Editor/EditorEngine.h"
+#include "Engine/Selection.h"
+#include "Editor.h"
+#endif
+
+
+#include "MySecondPluginTimestamp.h"
+#include "MySecondPluginManager.h"
+#include "RPPUtility.h"
+
 
 // Sets default values
 AMySecondPluginTimestamp::AMySecondPluginTimestamp()
+	:PluginManagerObject(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
 	SphereMesh->AttachTo(GetRootComponent());
 
@@ -22,6 +37,72 @@ AMySecondPluginTimestamp::AMySecondPluginTimestamp()
 	SphereMesh->SetupAttachment(RootComponent);
 
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AMySecondPluginTimestamp::HandleOnActorBeginOverlap);
+
+
+	if (GetWorld())
+	{
+		TArray<AActor*> foundManager;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMySecondPluginManager::StaticClass(), foundManager);
+
+		if (foundManager.Num() == 1)
+		{
+			PluginManagerObject = Cast<AMySecondPluginManager>(foundManager[0]);
+		}
+	}
+	
+}
+
+
+
+void AMySecondPluginTimestamp::DeleteFromMemo(AActor* InAActor)
+{
+	if (InAActor)
+	{
+		if (InAActor->GetName() == GetName())
+		{
+			URPPUtility::DeleteTimestamp(GetUniqueID());
+		}
+	}
+
+
+}
+
+void AMySecondPluginTimestamp::HandleOnDeleteActorsEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Actor %s delete end"), *GetName());
+}
+
+void AMySecondPluginTimestamp::HandleOnDuplicateActorsEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Actor %s duplicate end"), *GetName());
+}
+
+void AMySecondPluginTimestamp::OnConstruction(const FTransform& Transform)
+{
+#if WITH_EDITOR
+
+	//UE_LOG(LogTemp, Warning, TEXT("Actor ID: %i, Location: %s"), GetUniqueID(), *GetActorLocation().ToString());
+
+	GEditor->OnLevelActorDeleted().AddUObject(this, &AMySecondPluginTimestamp::DeleteFromMemo);
+
+	//FEditorDelegates::OnDeleteActorsEnd.AddUObject(this, &AMySecondPluginTimestamp::HandleOnDeleteActorsEnd);
+
+	//FEditorDelegates::OnDuplicateActorsEnd.AddUObject(this, &AMySecondPluginTimestamp::HandleOnDuplicateActorsEnd);
+
+	URPPUtility::AddTimestamp(this, GetWorld());
+	
+
+#endif
+
+}
+
+void AMySecondPluginTimestamp::BeginDestroy()
+{
+#if WITH_EDITOR
+
+	//UE_LOG(LogTemp, Warning, TEXT("Actor %s being destory"), *GetName());
+
+#endif
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +144,8 @@ void AMySecondPluginTimestamp::DecideSpawnActor()
 
 
 }
+
+
 
 // Called every frame
 void AMySecondPluginTimestamp::Tick(float DeltaTime)

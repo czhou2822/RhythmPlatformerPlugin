@@ -13,6 +13,10 @@ UCLASS()
 class MYSECONDPLUGIN_API AMySecondPluginTimestamp : public AActor
 {
 	GENERATED_BODY()
+
+
+private:
+	class AMySecondPluginManager* PluginManagerObject;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -30,6 +34,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<int32> SpawnPercentage;
 
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -39,6 +45,23 @@ protected:
 	
 	UFUNCTION()
 	void DecideSpawnActor();
+
+#if WITH_EDITOR
+
+	UFUNCTION()
+	void DeleteFromMemo(AActor* InAActor);
+
+	void HandleOnDeleteActorsEnd();
+
+	void HandleOnDuplicateActorsEnd();
+
+#endif // WITH_EDITOR
+
+
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	virtual void BeginDestroy() override;
 
 public:	
 	// Called every frame

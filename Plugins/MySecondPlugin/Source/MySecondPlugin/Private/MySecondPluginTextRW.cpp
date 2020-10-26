@@ -43,10 +43,11 @@ void UMySecondPluginTextRW::ParseLevelInfoJsonObject(TSharedPtr<FJsonValue> Json
     FJsonObjectConverter::JsonObjectToUStruct<FPlatformerEvent>(SingleEvent.ToSharedRef(), &EventTemp, 0, 0);
 
 
-    UE_LOG(LogTemp, Warning, TEXT("EventFrameStamp: %s.\n"), *EventTemp.EventName);
+    //UE_LOG(LogTemp, Warning, TEXT("EventFrameStamp: %s.\n"), *EventTemp.EventName);
 
-    EventMemo.Add(EventTemp);
 
+
+    EventMemo.FindOrAdd(EventTemp.EventUniqueID, EventTemp);
 
 }
 
@@ -97,7 +98,15 @@ FString UMySecondPluginTextRW::StringtifyLevelInfoJsonObject()
     CurrentLevelInfo.LevelFrameCount = 12345;
     CurrentLevelInfo.LevelName = TEXT("Test level");
     CurrentLevelInfo.SoundtrackName = TEXT("Imaginary soundtrack");
-    CurrentLevelInfo.Events = EventMemo;
+
+    TArray<FPlatformerEvent> EventTemp;
+
+    for (auto& Tmp : EventMemo)
+    {
+        EventTemp.Add(Tmp.Value);
+    }
+
+    CurrentLevelInfo.Events = EventTemp;
     
 
     FString OutputString;
@@ -114,36 +123,42 @@ FString UMySecondPluginTextRW::StringtifyLevelInfoJsonObject()
     return OutputString;
 }
 
-bool UMySecondPluginTextRW::AddNewEvent(FPlatformerEvent NewEvent)
+/*
+look through the memo, if so -> manipulating info
+if not, add
+*/
+
+bool UMySecondPluginTextRW::AddEvent(FPlatformerEvent NewEvent)
 {
-    //FPlatformerEvent EventTemp;
-
-    //EventTemp.EventName = EventName;
-    //EventTemp.EventFrameStamp = EventTimeStamp;
-
 
     TSharedPtr<FJsonObject> EventTempJsonObject = MakeShareable(new FJsonObject());
     EventTempJsonObject = FJsonObjectConverter::UStructToJsonObject(NewEvent, 0, 0);
 
-    EventMemo.Add(NewEvent);
 
-    //EventMemo.Add(EventTemp);
+    int32 EventName = EventTempJsonObject.Get()->GetIntegerField("EventUniqueID");
 
+    //if (EventName == "BP_TimeStamp")
+    //{
+    //    return false;
+    //}
 
-    /*
-    
-    TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-    JsonObject->SetStringField("Name", newTimeStamp->GetName());
-    JsonObject->SetNumberField("Location", SnapLineCursor);
-
-    FString OutputString;
-    TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-    FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
-
-    UE_LOG(LogTemp, Warning, TEXT("resulting jsonString -> %s"), *OutputString);
-    */
+    EventMemo.FindOrAdd(EventName, NewEvent);
 
 
+
+    UE_LOG(LogTemp, Warning, TEXT("EventMemo number: %i"), EventMemo.Num());
+    //EventMemo.Add(NewEvent);
+
+
+    return true;
+}
+
+bool UMySecondPluginTextRW::DeleteEvent(int32 InEventName)
+{
+
+    EventMemo.Remove(InEventName);
+
+    UE_LOG(LogTemp, Warning, TEXT("deleting Actor %i delete end, length remaining: %i"), InEventName, EventMemo.Num());
 
     return false;
 }

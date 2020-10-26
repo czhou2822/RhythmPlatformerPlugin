@@ -2,7 +2,7 @@
 
 
 #include "EditorViewportClient.h"
-
+#include "Kismet/GameplayStatics.h"
 
 #include "RPPUtility.h"
 #include "MySecondPluginTextRW.h"
@@ -34,7 +34,13 @@ URPPUtility::URPPUtility()
 {
 	URPPUtility::MySecondPluginTextRW = NewObject<UMySecondPluginTextRW>();
 
+	if (GetWorld())
+	{
+
+	}
+
 }
+
 void URPPUtility::SetEditorViewportClient(FEditorViewportClient* InEditorViewportClient)
 {
 	if (InEditorViewportClient)
@@ -84,8 +90,6 @@ TArray<float> URPPUtility::WaveToRawDataArray(USoundWave* SoundWave)
 
 	return Output;
 }
-
-
 
 void URPPUtility::SetDataRawArray(USoundWave* SoundWave)
 {
@@ -304,15 +308,113 @@ void URPPUtility::AddTimestamp(float InAudioCursor)
 		AMySecondPluginTimestamp* newTimeStamp = EditorViewportClient->GetWorld()->SpawnActor<AMySecondPluginTimestamp>(FVector(EditorViewportClient->GetViewLocation().X, 0, EditorViewportClient->GetViewLocation().Z), FRotator::ZeroRotator);
 
 		FPlatformerEvent NewEvent;
-		NewEvent.EventName = newTimeStamp->GetName();
+		NewEvent.EventUniqueID = newTimeStamp->GetUniqueID();
 		NewEvent.EventTime = InAudioCursor;
 
-		MySecondPluginTextRW->AddNewEvent(NewEvent);
+		MySecondPluginTextRW->AddEvent(NewEvent);
 	}
+
+}
+
+void URPPUtility::AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* World)
+{
+	if (InPluginTimestamp)
+	{
+		if (InPluginTimestamp->GetActorLocation().IsZero())
+		{
+			return;
+		}
+
+
+		FPlatformerEvent NewEvent;
+		NewEvent.EventUniqueID = InPluginTimestamp->GetUniqueID();
+		NewEvent.EventTime = WorldSpaceToAudioCursor(InPluginTimestamp->GetActorLocation(), World);
+
+		UE_LOG(LogTemp, Warning, TEXT("EventTime: %s"), *FString::SanitizeFloat(NewEvent.EventTime, 2));
+
+		MySecondPluginTextRW->AddEvent(NewEvent);
+		return;
+
+	}
+}
+
+void URPPUtility::DeleteTimestamp(int32 InEventID)
+{
+	MySecondPluginTextRW->DeleteEvent(InEventID);
+}
+
+float URPPUtility::WorldSpaceToAudioCursor(FVector InLocation, UWorld* World)
+{
+
+	TArray<AActor*> foundManager;
+	UGameplayStatics::GetAllActorsOfClass(World, AMySecondPluginManager::StaticClass(), foundManager);
+
+	if (foundManager.Num() == 1)
+	{
+		MySecondPluginManager = Cast<AMySecondPluginManager>(foundManager[0]);
+	}
+
+	if (MySecondPluginManager)
+	{
+		float Delta = InLocation.X - MySecondPluginManager->GetActorLocation().X;
+
+		float AudioCursor = Delta / MySecondPluginManager->RunningSpeed;
+
+		UE_LOG(LogTemp, Warning, TEXT("Delta: %s, AudioCursor: %s"), *FString::SanitizeFloat(Delta, 2), *FString::SanitizeFloat(AudioCursor, 2));
+
+		
+		return AudioCursor;
+	}
+	return 0.0f;
 
 }
 
 void URPPUtility::SetPluginManager(AMySecondPluginManager* InMySecondPluginManager)
 {
 	MySecondPluginManager = InMySecondPluginManager;
+}
+
+void URPPUtility::RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPluginManager)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %s. "), *FString::SanitizeFloat(PluginManagerObject->RunningSpeed));
+
+	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %d. "), MySecondPluginTextRW->EventMemo.Num());
+
+	if (World)
+	{
+		TSubclassOf<AMySecondPluginTimestamp> classToFind;
+		classToFind = AMySecondPluginTimestamp::StaticClass();
+		TArray<AActor*> FoundMarkers;
+		UGameplayStatics::GetAllActorsOfClass(World, classToFind, FoundMarkers);
+
+
+		for (auto& TmpEvent : MySecondPluginTextRW->EventMemo)
+		{
+
+			FActorSpawnParameters SpawnParms;
+			FVector SpawnLocation = FVector(TmpEvent.Value.EventTime * InPluginManager->RunningSpeed, 0, 0);
+
+			bool bIsActorFound = false;
+			for (AActor* SingleActor : FoundMarkers)
+			{
+				if (SingleActor->GetUniqueID() == TmpEvent.Value.EventUniqueID)
+				{
+					SpawnLocation.Z = SingleActor->GetActorLocation().Z;
+
+					SingleActor->SetActorLocation(SpawnLocation);
+					FoundMarkers.Remove(SingleActor);
+					bIsActorFound = true;
+					break;
+				}
+			}
+			if (!bIsActorFound)
+			{
+				AMySecondPluginTimestamp* newTimeStamp = World->
+					SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
+			}
+		}
+	}
+
+
+
 }

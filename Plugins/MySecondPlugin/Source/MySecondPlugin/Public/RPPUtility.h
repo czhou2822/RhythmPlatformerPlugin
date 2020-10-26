@@ -48,10 +48,9 @@ public:
 
 	static int32 WidgetHeight;
 
-
-
 	static FEditorViewportClient* EditorViewportClient;
 
+	static float WorldSpaceToAudioCursor(FVector InLocation, UWorld* World);
 
 
 
@@ -84,6 +83,12 @@ public:
 
 	static void AddTimestamp(float InAudioCursor);
 
+	static void AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* World);
+
+	static void DeleteTimestamp(int32 InEventID);
+
 	static void SetPluginManager(AMySecondPluginManager* InMySecondPluginManager);
+
+	static void RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPluginManager);
 
 };

@@ -510,11 +510,11 @@ FReply SMyCompoundWidget::MarkTimeStamp()
 	AMySecondPluginTimestamp* newTimeStamp = World->SpawnActor<AMySecondPluginTimestamp>(FVector(MyEditorViewportClient->GetViewLocation().X, 0, MyEditorViewportClient->GetViewLocation().Z), FRotator::ZeroRotator);
 
 	FPlatformerEvent NewEvent;
-	NewEvent.EventName = newTimeStamp->GetName();
+	NewEvent.EventUniqueID = newTimeStamp->GetUniqueID();
 	NewEvent.EventTime = AudioCursor;
 
 
-	MySecondPluginTextRW-> AddNewEvent(NewEvent);
+	MySecondPluginTextRW-> AddEvent(NewEvent);
 	
 
 	return FReply::Handled();
@@ -591,29 +591,29 @@ FReply SMyCompoundWidget::RefreshRunningSpeed()
 	UGameplayStatics::GetAllActorsOfClass(World, classToFind, FoundMarkers);
 
 
-	for (FPlatformerEvent Event : MySecondPluginTextRW->EventMemo)
-	{
-		FActorSpawnParameters SpawnParms;
-		SpawnParms.Name = FName(*Event.EventName);
-		FVector SpawnLocation = FVector(Event.EventTime * PluginManagerObject->RunningSpeed, 0, MyEditorViewportClient->GetViewLocation().Z);
+	//for (FPlatformerEvent Event : MySecondPluginTextRW->EventMemo)
+	//{
+	//	FActorSpawnParameters SpawnParms;
+	//	SpawnParms.Name = FName(*Event.EventName);
+	//	FVector SpawnLocation = FVector(Event.EventTime * PluginManagerObject->RunningSpeed, 0, MyEditorViewportClient->GetViewLocation().Z);
 
 
-		bool bIsActorFound = false;
-		for (AActor* SingleActor : FoundMarkers)
-		{
-			if (SingleActor->GetName() == Event.EventName)
-			{
-				SingleActor->SetActorLocation(SpawnLocation);
-				bIsActorFound = true;
-				break;
-			}
-		}
-		if (!bIsActorFound)
-		{
-			AMySecondPluginTimestamp* newTimeStamp = World->
-				SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
-		}
-	}
+	//	bool bIsActorFound = false;
+	//	for (AActor* SingleActor : FoundMarkers)
+	//	{
+	//		if (SingleActor->GetName() == Event.EventName)
+	//		{
+	//			SingleActor->SetActorLocation(SpawnLocation);
+	//			bIsActorFound = true;
+	//			break;
+	//		}
+	//	}
+	//	if (!bIsActorFound)
+	//	{
+	//		AMySecondPluginTimestamp* newTimeStamp = World->
+	//			SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
+	//	}
+	//}
 
 
 	

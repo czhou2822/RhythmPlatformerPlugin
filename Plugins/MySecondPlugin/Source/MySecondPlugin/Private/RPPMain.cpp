@@ -160,7 +160,6 @@ void SRPPMain::Initilization()
 			TArray<AActor*> foundManager;
 			UGameplayStatics::GetAllActorsOfClass(World, AMySecondPluginManager::StaticClass(), foundManager);
 
-
 			if (foundManager.Num() == 1)
 			{
 				PluginManagerObject = Cast<AMySecondPluginManager>(foundManager[0]);

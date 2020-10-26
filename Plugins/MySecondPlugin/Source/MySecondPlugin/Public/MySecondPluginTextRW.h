@@ -23,7 +23,7 @@ struct FPlatformerEvent
     float EventTime;  //indicate where is this event in frame
 
 	UPROPERTY()
-	FString EventName;
+	int32 EventUniqueID;
 
 
 };
@@ -68,8 +68,10 @@ private:
 
 	
 public:
-	TArray<FPlatformerEvent> EventMemo; //array to hold all intermediate FPlatformerEvent (timestamp)
+	//TArray<FPlatformerEvent> EventMemo; //array to hold all intermediate FPlatformerEvent (timestamp)
 
+	//pair event's uniqueID to platformerEvent
+	TMap<int32, FPlatformerEvent> EventMemo; //array to hold all intermediate FPlatformerEvent (timestamp)
 
 
 private:
@@ -82,15 +84,18 @@ private:
 	void ParseLevelInfoJsonObject(TSharedPtr<FJsonValue> JsonValue);
 
 public:
+
 	//UFUNCTION(BlueprintCallable, Category = "Custom", meta = (Keywords = "LoadTxt"))
-		bool LoadLevelInfo(FString FileNameA, FString& SaveTextA);
+	bool LoadLevelInfo(FString FileNameA, FString& SaveTextA);
 
 	//UFUNCTION(BlueprintCallable, Category = "Custom", meta = (Keywords = "SaveTxt"))
-		bool SaveLevelInfo(FString FileNameB);
+	bool SaveLevelInfo(FString FileNameB);
 
-		bool AddNewEvent(FPlatformerEvent NewEvent);
+	bool AddEvent(FPlatformerEvent NewEvent);
 
-		UMySecondPluginTextRW();
+	bool DeleteEvent(int32 InEventName);
+
+	UMySecondPluginTextRW();
 
 
 

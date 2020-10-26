@@ -43,7 +43,7 @@ private:
 
 	FReply SaveLevel();
 
-	//FReply RefreshRunningSpeed();
+	FReply RefreshRunningSpeed();
 
 	FReply ChangeBeatStartingTime();
 

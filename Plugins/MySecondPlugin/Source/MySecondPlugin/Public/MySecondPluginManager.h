@@ -55,8 +55,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TestFunction();
 
-
-
 	UFUNCTION(BlueprintCallable)
 	void PlaySoundFunction(float Start = 0);
 

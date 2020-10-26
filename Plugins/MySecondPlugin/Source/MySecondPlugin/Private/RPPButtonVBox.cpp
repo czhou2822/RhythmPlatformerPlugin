@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "EditorViewportClient.h"
 
 
 //user includes
@@ -67,37 +68,38 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 				]
 			]
 
-			+ SVerticalBox::Slot()   //SaveLevel
-			.VAlign(VAlign_Top)
-			.HAlign(HAlign_Left)
-			[
-				SNew(SButton)
-				.OnClicked(this, &SRPPButtonVBox::SaveLevel)
-				.Content()
-				[
-					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("SaveLevel")))
-				]
-			]
+			//+ SVerticalBox::Slot()   //SaveLevel
+			//.VAlign(VAlign_Top)
+			//.HAlign(HAlign_Left)
+			//[
+			//	SNew(SButton)
+			//	.OnClicked(this, &SRPPButtonVBox::SaveLevel)
+			//	.Content()
+			//	[
+			//		SNew(STextBlock)
+			//		.Text(FText::FromString(TEXT("SaveLevel")))
+			//	]
+			//]
 
-			+ SVerticalBox::Slot()   //LoadLevel
-			.VAlign(VAlign_Top)
-			.HAlign(HAlign_Left)
-			[
-				SNew(SButton)
-				.OnClicked(this, &SRPPButtonVBox::LoadLevel)
-				.Content()
-				[
-					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("LoadLevel")))
-				]
-			]
+			//+ SVerticalBox::Slot()   //LoadLevel
+			//.VAlign(VAlign_Top)
+			//.HAlign(HAlign_Left)
+			//[
+			//	SNew(SButton)
+			//	.OnClicked(this, &SRPPButtonVBox::LoadLevel)
+			//	.Content()
+			//	[
+			//		SNew(STextBlock)
+			//		.Text(FText::FromString(TEXT("LoadLevel")))
+			//	]
+			//]
 
 			+ SVerticalBox::Slot()   //RefreshRunningSpeed button
 			.VAlign(VAlign_Top)
 			.HAlign(HAlign_Left)
 			[
 				SNew(SButton)
+				.OnClicked(this, &SRPPButtonVBox::RefreshRunningSpeed)
 				.Content()
 				[
 					SNew(STextBlock)
@@ -161,6 +163,17 @@ FReply SRPPButtonVBox::SaveLevel()
 {
 	URPPUtility::SaveLevel();
 	return FReply::Handled();
+
+}
+
+FReply SRPPButtonVBox::RefreshRunningSpeed()
+{
+	if (RPPMain)
+	{
+		URPPUtility::RefreshRunSpeed(RPPMain->EditorViewportClient->GetWorld(), RPPMain->PluginManagerObject);
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
 
 }
 

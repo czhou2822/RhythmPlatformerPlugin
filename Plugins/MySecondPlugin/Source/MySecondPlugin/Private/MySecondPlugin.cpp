@@ -86,7 +86,7 @@ void FMySecondPluginModule::PluginButtonClicked()
 
 	int32 Height = GEditor->GetActiveViewport()->GetSizeXY().Y;
 
-	UE_LOG(LogTemp, Warning, TEXT("Width: %i, Height: %i"), Width, Height);
+//	UE_LOG(LogTemp, Warning, TEXT("Width: %i, Height: %i"), Width, Height);
 
 	if (RPPMain == nullptr)
 	{

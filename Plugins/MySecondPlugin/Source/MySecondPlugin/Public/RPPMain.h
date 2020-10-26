@@ -32,13 +32,8 @@ public:
 private:
 
 
-
-
-	class AMySecondPluginManager* PluginManagerObject;
-
 	class URPPUtility* RPPUtil;
 
-	class FEditorViewportClient* EditorViewportClient;
 
 	class UAudioComponent* AudioComponent;
 
@@ -63,6 +58,10 @@ public:
 	TSharedPtr<class SRPPButtonVBox> RPPButtonVBox;
 
 	TSharedPtr<class SRPPMainCanvas> RPPMainCanvas;
+
+	class FEditorViewportClient* EditorViewportClient;
+
+	class AMySecondPluginManager* PluginManagerObject;
 
 	float AudioCursor = 0.f;    //playtime of the track, in seconds
 
