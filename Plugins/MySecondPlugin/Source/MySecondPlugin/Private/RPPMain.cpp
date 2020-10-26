@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "EditorViewportClient.h"
 #include "Components/AudioComponent.h"
+#include "Editor.h"
 
 //user include
 #include "RPPMain.h"
@@ -64,6 +65,14 @@ void SRPPMain::Tick(const FGeometry& AllottedGeometry, const double InCurrentTim
 	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 
 
+	{
+		if (EditorViewportClient->GetOrthoZoom() != OrthoZoom)   //zoom happened
+		{
+			OrthoZoom = EditorViewportClient->GetOrthoZoom();
+			ProcessZoom();                                       //recalculate zoom and display
+		}
+	}
+
 	//update look at
 	{
 		if ((AudioComponent->bIsPaused) && (AudioPercentage <= 1))
@@ -82,6 +91,7 @@ void SRPPMain::Tick(const FGeometry& AllottedGeometry, const double InCurrentTim
 
 
 
+
 }
 
 void SRPPMain::UpdateCamaraLookAt()
@@ -92,7 +102,7 @@ void SRPPMain::UpdateCamaraLookAt()
 
 		float Delta = AudioCursor * PluginManagerObject->RunningSpeed;
 
-		URPPUtility::RawDrawArrayToDrawArray(SnaplineCursor, 20000 + SnaplineCursor);
+		URPPUtility::RawDrawArrayToDrawArray(SnaplineCursor, NUMBER_OF_LINES_IN_WINDOW + SnaplineCursor);
 
 		EditorViewportClient->SetViewLocation(FVector(CameraStartingLocation.X + Delta, newLookAt.Y, newLookAt.Z));
 
@@ -150,9 +160,15 @@ void SRPPMain::Initilization()
 
 	//other init
 	EditorViewportClient = (FEditorViewportClient*)GEditor->GetActiveViewport()->GetClient();
+
 	if (EditorViewportClient)
 	{
+
+		OrthoZoom = EditorViewportClient->GetOrthoZoom();
+
 		CameraStartingLocation = EditorViewportClient->GetViewLocation();   //get default location of the camera, mainly for y and z as x will be override by tick shortly
+
+		FEditorDelegates::OnEditorCameraMoved.AddSP(this, &SRPPMain::OnEditorCameraMoved);
 
 		UWorld* World = EditorViewportClient->GetWorld();
 		if (World)
@@ -166,13 +182,15 @@ void SRPPMain::Initilization()
 				//plugin manager related settings 
 				if (PluginManagerObject)
 				{
-					if (USoundWave* SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound)
+					SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound;
+					if (SoundWave)
 					{
 						AudioDuration = SoundWave->Duration;
 						AudioComponent = PluginManagerObject->PluginAudioPlayer;
 						AudioComponent->SetPaused(true);
 						AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
 						ProcessSoundWave();
+
 
 					}
 					ResetViewport();
@@ -186,20 +204,76 @@ void SRPPMain::Initilization()
 
 void SRPPMain::ProcessSoundWave()
 {
-	if (USoundWave* SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound)
+	if (SoundWave)
 	{
+		
 		URPPUtility::SetDataRawArray(SoundWave);
-		WindowLength = (NUMBER_OF_LINES_IN_WINDOW * ZoomFactor) / ((float)URPPUtility::DataRawArray.Num()) * (float)SoundWave->Duration;
-		URPPUtility::RawDataArrayToRawDrawArray(ZoomFactor);  //bucket size
-		URPPUtility::RawDrawArrayToDrawArray(0, NUMBER_OF_LINES_IN_WINDOW);  //start, end
 		URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, SoundWave->Duration, PluginManagerObject->BeatStartingTime);
 		URPPUtility::SetEditorViewportClient(EditorViewportClient);
 		URPPUtility::SetPluginManager(PluginManagerObject);
+
+		ProcessZoom();
+
+
 	}
 	else
 	{
 		URPPUtility::ClearEverything();
 	}
+
+}
+
+int SRPPMain::GetZoomFactor()
+{
+	if (SoundWave)
+	{
+		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
+			EditorViewportClient->Viewport,
+			EditorViewportClient->GetWorld()->Scene,
+			EditorViewportClient->EngineShowFlags)
+			.SetRealtimeUpdate(true));
+
+		FSceneView* SceneView = EditorViewportClient->CalcSceneView(&ViewFamily);
+
+		int32 Width = GEditor->GetActiveViewport()->GetSizeXY().X;
+
+		int32 Height = GEditor->GetActiveViewport()->GetSizeXY().Y;
+
+		FVector WorldLPosTemp;
+		FVector WorldDirectTemp;
+
+		FVector WorldRPosTemp;
+
+		SceneView->DeprojectFVector2D(FVector2D(0, Height / 2), WorldLPosTemp, WorldDirectTemp);
+		//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldLPosTemp.ToString(), *WorldDirectTemp.ToString());
+
+		SceneView->DeprojectFVector2D(FVector2D(Width, Height / 2), WorldRPosTemp, WorldDirectTemp);
+		//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldRPosTemp.ToString(), *WorldDirectTemp.ToString());
+
+		WindowLength = (FMath::Abs(WorldRPosTemp.X - WorldLPosTemp.X)) / PluginManagerObject->RunningSpeed;
+
+		ZoomFactor = WindowLength / (float)SoundWave->Duration * ((float)URPPUtility::DataRawArray.Num()) / NUMBER_OF_LINES_IN_WINDOW;
+		
+		if (ZoomFactor >= 1)
+		{
+			return ZoomFactor;
+		}
+	}
+
+	return 1;
+}
+
+void SRPPMain::ProcessZoom()
+{
+	ZoomFactor = GetZoomFactor();
+
+	URPPUtility::RawDataArrayToRawDrawArray(ZoomFactor);  //bucket size
+	URPPUtility::RawDrawArrayToDrawArray(0, NUMBER_OF_LINES_IN_WINDOW);  //start, end
+}
+
+void SRPPMain::OnEditorCameraMoved(const FVector& InFVector, const FRotator& InRotator, ELevelViewportType InViewportType, int32 InInt)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %i"), *InFVector.ToString(), InInt);
 
 }
 

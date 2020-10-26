@@ -31,9 +31,9 @@ public:
 
 private:
 
+	float OrthoZoom = 0.f;
 
 	class URPPUtility* RPPUtil;
-
 
 	class UAudioComponent* AudioComponent;
 
@@ -45,13 +45,13 @@ private:
 
 	int32 SnaplineCursor = 0; //index of the RawDrawArray. 
 
-	const int32 NUMBER_OF_LINES_IN_WINDOW = 20000; //how many lines in waveform
+	const int32 NUMBER_OF_LINES_IN_WINDOW = 10000; //how many lines in waveform
 
 	int32 ZoomFactor = 5;      //how many samples in each bucket, for example, if this is 32, RawDrawArray takes ONE peak value out of 32 in RawDataArray
 
 	FVector CameraStartingLocation = FVector(0, 0, 0);
 
-
+	USoundWave* SoundWave = nullptr;
 
 
 public:
@@ -97,5 +97,14 @@ public:
 
 	//process soundwave in PluginObject->audiocomponent
 	void ProcessSoundWave();
+
+	//called when viewport zoomed
+	int GetZoomFactor();
+
+	void ProcessZoom();
+
+	void OnEditorCameraMoved(const FVector& InFVector, const FRotator& InRotator, ELevelViewportType InViewportType, int32 InInt);
+
+
 
 };
