@@ -172,7 +172,6 @@ void SRPPMain::Initilization()
 						AudioComponent = PluginManagerObject->PluginAudioPlayer;
 						AudioComponent->SetPaused(true);
 						AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
-						WindowLength = (NUMBER_OF_LINES_IN_WINDOW * ZoomFactor) / ((float)URPPUtility::DataRawArray.Num()) * (float)SoundWave->Duration;
 						ProcessSoundWave();
 
 					}
@@ -190,11 +189,16 @@ void SRPPMain::ProcessSoundWave()
 	if (USoundWave* SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound)
 	{
 		URPPUtility::SetDataRawArray(SoundWave);
+		WindowLength = (NUMBER_OF_LINES_IN_WINDOW * ZoomFactor) / ((float)URPPUtility::DataRawArray.Num()) * (float)SoundWave->Duration;
 		URPPUtility::RawDataArrayToRawDrawArray(ZoomFactor);  //bucket size
 		URPPUtility::RawDrawArrayToDrawArray(0, NUMBER_OF_LINES_IN_WINDOW);  //start, end
 		URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, SoundWave->Duration, PluginManagerObject->BeatStartingTime);
 		URPPUtility::SetEditorViewportClient(EditorViewportClient);
 		URPPUtility::SetPluginManager(PluginManagerObject);
+	}
+	else
+	{
+		URPPUtility::ClearEverything();
 	}
 
 }

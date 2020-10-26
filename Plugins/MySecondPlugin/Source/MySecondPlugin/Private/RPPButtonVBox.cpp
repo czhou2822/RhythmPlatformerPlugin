@@ -26,7 +26,7 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 				.Content()
 				[
 					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("Reset")))
+					.Text(FText::FromString(TEXT("BackToBeginning")))
 				]
 			]
 
@@ -39,34 +39,34 @@ void SRPPButtonVBox::Construct(const FArguments& InArgs)
 				.Content()
 				[
 					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("Reload")))
+					.Text(FText::FromString(TEXT("Reset")))
 				]
 			]
 
-			+ SVerticalBox::Slot()   //Mark button
-			.VAlign(VAlign_Top)
-			.HAlign(HAlign_Left)
-			[
-				SNew(SButton)
-				.OnClicked(this, &SRPPButtonVBox::MarkTimeStamp)
-				.Content()
-				[
-					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("Mark")))
-				]
-			]
+			//+ SVerticalBox::Slot()   //Mark button
+			//.VAlign(VAlign_Top)
+			//.HAlign(HAlign_Left)
+			//[
+			//	SNew(SButton)
+			//	.OnClicked(this, &SRPPButtonVBox::MarkTimeStamp)
+			//	.Content()
+			//	[
+			//		SNew(STextBlock)
+			//		.Text(FText::FromString(TEXT("Mark")))
+			//	]
+			//]
 
-			+ SVerticalBox::Slot()   //Setstarting button
-			.VAlign(VAlign_Top)
-			.HAlign(HAlign_Left)
-			[
-				SNew(SButton)
-				.Content()
-				[
-					SNew(STextBlock)
-					.Text(FText::FromString(TEXT("StartingPosition")))
-				]
-			]
+			//+ SVerticalBox::Slot()   //Setstarting button
+			//.VAlign(VAlign_Top)
+			//.HAlign(HAlign_Left)
+			//[
+			//	SNew(SButton)
+			//	.Content()
+			//	[
+			//		SNew(STextBlock)
+			//		.Text(FText::FromString(TEXT("StartingPosition")))
+			//	]
+			//]
 
 			//+ SVerticalBox::Slot()   //SaveLevel
 			//.VAlign(VAlign_Top)

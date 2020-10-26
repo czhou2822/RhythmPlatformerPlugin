@@ -91,4 +91,6 @@ public:
 
 	static void RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPluginManager);
 
+	static void ClearEverything();
+
 };

@@ -18,7 +18,6 @@ TArray<FVector2D> URPPUtility::DrawArray;	//DrawArray
 TArray<float> URPPUtility::BeatRawArray{ 0.f, 1.f, 2.f, 3.f, 4.f,5.f, 6.f, 7.f, 8.f, 9.f, 10.f };    //Raw beat info; elements in second. for example, if BPM = 60, it shoud be [0,1,2,3,4,5...]
 TArray<FVector2D> URPPUtility::BeatDrawArray;	//BeatArray
 
-//UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = NewObject<UMySecondPluginTextRW>();
 UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = nullptr;
 
 FEditorViewportClient* URPPUtility::EditorViewportClient = nullptr;
@@ -274,19 +273,23 @@ calculatess beat array. e.g. if bpm = 60. BeatRawArray = {0,1,2,3 ...}
 */
 void URPPUtility::CalculateRawBeatArray(const float& InBPM, const float& InAudioDuation, const float& InBeatStartingTime)
 {
-	BeatRawArray.Empty();
-
-	BeatRawArray.Add(0.f);
-
-	float NextBeatTime = 0.f + InBeatStartingTime;
-
-	float BeatInveral = 60.f / InBPM;
-
-	while (NextBeatTime <= InAudioDuation)
+	if (InBPM)
 	{
-		BeatRawArray.Add(NextBeatTime);
-		NextBeatTime += BeatInveral;
+		URPPUtility::BeatRawArray.Empty();
+
+		URPPUtility::BeatRawArray.Add(0.f);
+
+		float NextBeatTime = 0.f + InBeatStartingTime;
+
+		float BeatInveral = 60.f / InBPM;
+
+		while (NextBeatTime <= InAudioDuation)
+		{
+			URPPUtility::BeatRawArray.Add(NextBeatTime);
+			NextBeatTime += BeatInveral;
+		}
 	}
+
 	return;
 }
 
@@ -415,6 +418,24 @@ void URPPUtility::RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPlugi
 		}
 	}
 
+
+
+}
+
+void URPPUtility::ClearEverything()
+{
+	URPPUtility::DataRawArray.Empty();    
+	URPPUtility::DataDrawArray.Empty();   
+	URPPUtility::DrawArray.Empty();	
+
+	URPPUtility::BeatRawArray.Empty();    
+	URPPUtility::BeatDrawArray.Empty();	
+
+	URPPUtility::MySecondPluginTextRW = nullptr;
+
+	URPPUtility::EditorViewportClient = nullptr;
+
+	URPPUtility::MySecondPluginManager = nullptr;
 
 
 }
