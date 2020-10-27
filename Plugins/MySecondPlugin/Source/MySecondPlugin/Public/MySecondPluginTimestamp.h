@@ -55,13 +55,15 @@ protected:
 
 	void HandleOnDuplicateActorsEnd();
 
+	//virtual void BeginDestroy() override;
+
+
 #endif // WITH_EDITOR
 
 
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	virtual void BeginDestroy() override;
 
 public:	
 	// Called every frame

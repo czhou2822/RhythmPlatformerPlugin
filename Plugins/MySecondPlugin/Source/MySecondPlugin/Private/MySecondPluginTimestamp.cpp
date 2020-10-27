@@ -98,14 +98,14 @@ void AMySecondPluginTimestamp::OnConstruction(const FTransform& Transform)
 
 }
 
-void AMySecondPluginTimestamp::BeginDestroy()
-{
-#if WITH_EDITOR
-
-	//UE_LOG(LogTemp, Warning, TEXT("Actor %s being destory"), *GetName());
-
-#endif
-}
+//void AMySecondPluginTimestamp::BeginDestroy()
+//{
+//#if WITH_EDITOR
+//
+//	//UE_LOG(LogTemp, Warning, TEXT("Actor %s being destory"), *GetName());
+//
+//#endif
+//}
 
 // Called when the game starts or when spawned
 void AMySecondPluginTimestamp::BeginPlay()

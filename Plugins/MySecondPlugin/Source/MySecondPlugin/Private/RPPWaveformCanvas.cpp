@@ -12,11 +12,7 @@
 #include "MySecondPluginManager.h"
 
 
-
-
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-
-
 
 
 void SRPPWaveformCanvas::Construct(const FArguments& InArgs)
@@ -50,7 +46,6 @@ void SRPPWaveformCanvas::Tick(const FGeometry& AllottedGeometry, const double In
 	}
 
 }
-
 
 /**
  * Sets border position. Called when constructed. Updates @Borderbox
@@ -119,18 +114,13 @@ void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 	float AudioDuration = RPPMain->AudioDuration;
 	float LineHeight = 200;
 
-	float UnitPerSecond = URPPUtility::WidgetWidth / WindowLength; //
+	float UnitPerSecond = URPPUtility::WidgetWidth / WindowLength ; //
 	float WidgetWidth = URPPUtility::WidgetWidth;
 
 	int32 StartingIndex = 1;
 	int32 LastXCord = 0;
 	float LowerBound = CurrentCursor - WindowLength / 2; //where beat grid starts to render. -> left side of the screen. 
 	float UpperBound = CurrentCursor + WindowLength / 2;
-
-	if (CurrentCursor - WindowLength / 2 < WindowLength / 2)  //if cursor is less than half of window length, that means window is fill with head. No beat should be rendered.
-	{
-		//	return;
-	}
 
 	URPPUtility::BeatDrawArray.Empty();
 
@@ -148,7 +138,6 @@ void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 	//	{
 	//		StartingIndex++;
 	//	}
-
 	//	//LastXCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
 	//}
 
@@ -162,26 +151,24 @@ void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 	while ((StartingIndex < URPPUtility::BeatRawArray.Num()) && (URPPUtility::BeatRawArray[StartingIndex] < UpperBound))
 	{
 
-		float XTemp = (URPPUtility::BeatRawArray[StartingIndex] * UnitPerSecond);
-		XTemp = FMath::Fmod(XTemp, WidgetWidth);
+		float XTemp = (URPPUtility::BeatRawArray[StartingIndex] -LowerBound) * UnitPerSecond;
+
 
 		URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding));   //top point
 		URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding) + FVector2D(0, LineHeight)); //bottom point
 		StartingIndex++;
+
+
+
 		//old
-
 		//float XCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex] - URPPUtility::BeatRawArray[StartingIndex - 1]) * BorderUnitPerSecond;
-
 		//URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding));   //top point
 		//URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding) + FVector2D(0, LineHeight)); //bottom point
-
 		//StartingIndex++;
-
 		//LastXCord = XCord;
 
 	}
 }
-
 
 /*
 this function is called multiple times while on painting phase.
@@ -205,7 +192,6 @@ void SRPPWaveformCanvas::DrawBeatGrid(float CurrentCursor, const FGeometry& Allo
 	}
 
 }
-
 
 int32 SRPPWaveformCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyClippingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
