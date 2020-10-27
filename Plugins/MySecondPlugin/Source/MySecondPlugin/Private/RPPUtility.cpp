@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "RPPUtility.h"
 
 #include "EditorViewportClient.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "RPPUtility.h"
 #include "MySecondPluginTextRW.h"
 #include "MySecondPluginTimestamp.h"
 #include "MySecondPluginManager.h"

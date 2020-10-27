@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "RPPMain.h"
 
 //engine include
 #include "Kismet/GameplayStatics.h"
@@ -8,7 +9,6 @@
 #include "Editor.h"
 
 //user include
-#include "RPPMain.h"
 #include "RPPUtility.h"
 #include "MySecondPluginManager.h"
 
@@ -235,28 +235,31 @@ int SRPPMain::GetZoomFactor()
 
 		FSceneView* SceneView = EditorViewportClient->CalcSceneView(&ViewFamily);
 
-		int32 Width = GEditor->GetActiveViewport()->GetSizeXY().X;
+		int32 Width = URPPUtility::WidgetWidth;
 
-		int32 Height = GEditor->GetActiveViewport()->GetSizeXY().Y;
-
-		FVector WorldLPosTemp;
-		FVector WorldDirectTemp;
-
-		FVector WorldRPosTemp;
-
-		SceneView->DeprojectFVector2D(FVector2D(0, Height / 2), WorldLPosTemp, WorldDirectTemp);
-		//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldLPosTemp.ToString(), *WorldDirectTemp.ToString());
-
-		SceneView->DeprojectFVector2D(FVector2D(Width, Height / 2), WorldRPosTemp, WorldDirectTemp);
-		//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldRPosTemp.ToString(), *WorldDirectTemp.ToString());
-
-		WindowLength = (FMath::Abs(WorldRPosTemp.X - WorldLPosTemp.X)) / PluginManagerObject->RunningSpeed;
-
-		ZoomFactor = WindowLength / (float)SoundWave->Duration * ((float)URPPUtility::DataRawArray.Num()) / NUMBER_OF_LINES_IN_WINDOW;
+		int32 Height = URPPUtility::WidgetHeight;
 		
-		if (ZoomFactor >= 1)
+		if (Width && Height)
 		{
-			return ZoomFactor;
+			FVector WorldLPosTemp;
+			FVector WorldDirectTemp;
+
+			FVector WorldRPosTemp;
+
+			SceneView->DeprojectFVector2D(FVector2D(0, Height / 2), WorldLPosTemp, WorldDirectTemp);
+			//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldLPosTemp.ToString(), *WorldDirectTemp.ToString());
+
+			SceneView->DeprojectFVector2D(FVector2D(Width, Height / 2), WorldRPosTemp, WorldDirectTemp);
+			//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldRPosTemp.ToString(), *WorldDirectTemp.ToString());
+
+			WindowLength = (FMath::Abs(WorldRPosTemp.X - WorldLPosTemp.X)) / PluginManagerObject->RunningSpeed;
+
+			ZoomFactor = WindowLength / (float)SoundWave->Duration * ((float)URPPUtility::DataRawArray.Num()) / NUMBER_OF_LINES_IN_WINDOW;
+
+			if (ZoomFactor >= 1)
+			{
+				return ZoomFactor;
+			}
 		}
 	}
 

@@ -9,6 +9,8 @@
 #include "RPPWaveformCanvas.h"
 #include "RPPUtility.h"
 #include "RPPMain.h"
+#include "MySecondPluginManager.h"
+
 
 
 
@@ -110,17 +112,21 @@ For example, if there's beat at 3s and the window is 5s, it calculates beats wit
 Called every frames. */
 void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 {
-	float Border = 0;
 
 	float Padding = 0;
 	float WindowLength = RPPMain->WindowLength;
-	float BorderUnitPerSecond = 600.f;
+	float BorderUnitPerSecond = RPPMain->PluginManagerObject->RunningSpeed;
 	float AudioDuration = RPPMain->AudioDuration;
 	float LineHeight = 200;
+
+	float UnitPerSecond = URPPUtility::WidgetWidth / WindowLength; //
+	float WidgetWidth = URPPUtility::WidgetWidth;
 
 	int32 StartingIndex = 1;
 	int32 LastXCord = 0;
 	float LowerBound = CurrentCursor - WindowLength / 2; //where beat grid starts to render. -> left side of the screen. 
+	float UpperBound = CurrentCursor + WindowLength / 2;
+
 	if (CurrentCursor - WindowLength / 2 < WindowLength / 2)  //if cursor is less than half of window length, that means window is fill with head. No beat should be rendered.
 	{
 		//	return;
@@ -128,38 +134,50 @@ void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 
 	URPPUtility::BeatDrawArray.Empty();
 
-	if (CurrentCursor < WindowLength / 2) //header presented
+	//if (CurrentCursor < WindowLength / 2) //header presented
+	//{
+	//	LastXCord = LastXCord + (WindowLength / 2 - CurrentCursor) * BorderUnitPerSecond;
+	//}
+	//else if (CurrentCursor > AudioDuration)  //cursor is beyond audio file
+	//{
+	//	return;
+	//}
+	//else                                        //default
+	//{
+	//	while ((URPPUtility::BeatRawArray[StartingIndex] < (LowerBound)) && (StartingIndex < URPPUtility::BeatRawArray.Num()))
+	//	{
+	//		StartingIndex++;
+	//	}
+
+	//	//LastXCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
+	//}
+
+	while ((URPPUtility::BeatRawArray[StartingIndex] < (LowerBound)) && (StartingIndex < URPPUtility::BeatRawArray.Num()))
 	{
-		Border = CurrentCursor + WindowLength / 2;
-		LastXCord = LastXCord + (WindowLength / 2 - CurrentCursor) * BorderUnitPerSecond;
-		//TODO add first beat
-	}
-	else if (CurrentCursor > AudioDuration)  //cursor is beyond audio file
-	{
-		return;
-	}
-	else                                        //default
-	{
-		Border = CurrentCursor + WindowLength / 2;
-		while ((URPPUtility::BeatRawArray[StartingIndex] < (LowerBound)) && (StartingIndex < URPPUtility::BeatRawArray.Num()))
-		{
 			StartingIndex++;
-		}
-
-		LastXCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
 	}
 
-	while ((StartingIndex < URPPUtility::BeatRawArray.Num()) && (URPPUtility::BeatRawArray[StartingIndex] < Border))
+
+
+	while ((StartingIndex < URPPUtility::BeatRawArray.Num()) && (URPPUtility::BeatRawArray[StartingIndex] < UpperBound))
 	{
 
-		float XCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex] - URPPUtility::BeatRawArray[StartingIndex - 1]) * BorderUnitPerSecond;
+		float XTemp = (URPPUtility::BeatRawArray[StartingIndex] * UnitPerSecond);
+		XTemp = FMath::Fmod(XTemp, WidgetWidth);
 
-		URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding));   //top point
-		URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding) + FVector2D(0, LineHeight)); //bottom point
-
+		URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding));   //top point
+		URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding) + FVector2D(0, LineHeight)); //bottom point
 		StartingIndex++;
+		//old
 
-		LastXCord = XCord;
+		//float XCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex] - URPPUtility::BeatRawArray[StartingIndex - 1]) * BorderUnitPerSecond;
+
+		//URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding));   //top point
+		//URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding) + FVector2D(0, LineHeight)); //bottom point
+
+		//StartingIndex++;
+
+		//LastXCord = XCord;
 
 	}
 }

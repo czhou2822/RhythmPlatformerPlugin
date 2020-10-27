@@ -1,4 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+#include "MySecondPluginTimestamp.h"
 
 #include "components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,7 +13,6 @@
 #endif
 
 
-#include "MySecondPluginTimestamp.h"
 #include "MySecondPluginManager.h"
 #include "RPPUtility.h"
 
@@ -25,7 +25,9 @@ AMySecondPluginTimestamp::AMySecondPluginTimestamp()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
-	SphereMesh->AttachTo(GetRootComponent());
+//	SphereMesh->AttachTo(GetRootComponent());
+
+	SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	SphereMesh->SetStaticMesh(SphereMeshAsset.Object);

@@ -59,7 +59,7 @@ bool UMySecondPluginTextRW::LoadLevelInfo(FString FileNameA, FString& SaveTextA)
     ReadLevelInfo.Empty();
     EventMemo.Empty();
 
-    bool ReturnFlag = FFileHelper::LoadFileToString(ReadLevelInfo, *(FPaths::GameDir() + FileNameA));  //read from save
+    bool ReturnFlag = FFileHelper::LoadFileToString(ReadLevelInfo, *(FPaths::ProjectDir() + FileNameA));  //read from save
 
     //UE_LOG(LogTemp, Warning, TEXT("read from save jsonString -> %s"), *ReadLevelInfo);
 
@@ -90,7 +90,7 @@ bool UMySecondPluginTextRW::SaveLevelInfo(FString FileNameB)
     int32 index = 0;
     FString StringtifiedLevelInfo = StringtifyLevelInfoJsonObject();
 
-    return FFileHelper::SaveStringToFile(StringtifiedLevelInfo, *(FPaths::GameDir() + FileNameB));  //write to hdd/save save file
+    return FFileHelper::SaveStringToFile(StringtifiedLevelInfo, *(FPaths::ProjectDir() + FileNameB));  //write to hdd/save save file
 } 
 
 FString UMySecondPluginTextRW::StringtifyLevelInfoJsonObject()
