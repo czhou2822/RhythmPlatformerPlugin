@@ -23,13 +23,15 @@ public:
 	SLATE_BEGIN_ARGS(SRPPMain)
 	{}
 	SLATE_ARGUMENT(float, RPPWidth)
-	SLATE_ARGUMENT(float, RPPHeight)
-	SLATE_END_ARGS()
+		SLATE_ARGUMENT(float, RPPHeight)
+		SLATE_END_ARGS()
 
-	/** Constructs this widget with InArgs */
+		/** Constructs this widget with InArgs */
 
 
 private:
+
+	bool bIsValidated = false;
 
 	float OrthoZoom = 0.f;
 
@@ -61,7 +63,10 @@ public:
 
 	class FEditorViewportClient* EditorViewportClient;
 
-	class AMySecondPluginManager* PluginManagerObject;
+//	class AMySecondPluginManager* PluginManagerObject;
+
+	class ARPPPluginManager* RPPPluginManager;
+
 
 	float AudioCursor = 0.f;    //playtime of the track, in seconds
 
@@ -78,7 +83,7 @@ private:
 
 
 public:
-	
+
 	void Construct(const FArguments& InArgs);
 
 	void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime); // called everyframe and used for our gamelogic
@@ -105,6 +110,12 @@ public:
 
 	void OnEditorCameraMoved(const FVector& InFVector, const FRotator& InRotator, ELevelViewportType InViewportType, int32 InInt);
 
+	void HandleOnNewActorsDropped(const TArray<UObject*>& InUObjects, const TArray<AActor*>& InAActors);
 
+	void HandleOnNewRPPEventPlaced(int32 InRPPID);
+
+	void HandleOnNewRPPEventRemoved(int32 InRPPID);
+
+	bool ValidatePluginManager(ARPPPluginManager* RPPPluginManager);
 
 };

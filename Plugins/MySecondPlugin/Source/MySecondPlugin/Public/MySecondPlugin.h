@@ -10,6 +10,8 @@
 class FToolBarBuilder;
 class FMenuBuilder;
 
+DECLARE_LOG_CATEGORY_EXTERN(LogRPP, Log, All);
+
 class FMySecondPluginModule : public IModuleInterface
 {
 public:

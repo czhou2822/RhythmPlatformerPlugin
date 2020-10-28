@@ -28,20 +28,19 @@ AMySecondPluginTimestamp::AMySecondPluginTimestamp()
 //	SphereMesh->AttachTo(GetRootComponent());
 
 	SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-
+	//
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 
-	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	//SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	//RootComponent = SphereComp;
-	RootComponent = SphereComp;
-
-	SphereMesh->SetupAttachment(RootComponent);
-
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AMySecondPluginTimestamp::HandleOnActorBeginOverlap);
+	RootComponent = SphereMesh;
 
 
-	if (GetWorld())
+	//SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AMySecondPluginTimestamp::HandleOnActorBeginOverlap);
+
+
+	if (GetWorld()!=NULL)
 	{
 		TArray<AActor*> foundManager;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMySecondPluginManager::StaticClass(), foundManager);

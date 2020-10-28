@@ -31,7 +31,6 @@ AMySecondPluginManager::AMySecondPluginManager()
 	PluginAudioPlayer->OnAudioPlaybackPercent.AddDynamic(this, &AMySecondPluginManager::HandleOnPlaybackPercent);
 		
 
-	RunningSpeed = 600.f;
 
 }
 

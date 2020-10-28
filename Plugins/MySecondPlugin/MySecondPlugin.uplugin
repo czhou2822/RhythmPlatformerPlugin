@@ -16,7 +16,12 @@
 	"Modules": [
 		{
 			"Name": "MySecondPlugin",
-			"Type": "Developer",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "RPPGameModule",
+			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
 	]

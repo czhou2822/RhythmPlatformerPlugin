@@ -44,13 +44,16 @@ public:
 
 	static class AMySecondPluginManager* MySecondPluginManager;
 
+	static class ARPPPluginManager* RPPPluginManager;
+
 	static int32 WidgetWidth;
 
 	static int32 WidgetHeight;
 
+	static UWorld* World;
+
 	static FEditorViewportClient* EditorViewportClient;
 
-	static float WorldSpaceToAudioCursor(FVector InLocation, UWorld* World);
 
 
 
@@ -83,14 +86,31 @@ public:
 
 	static void AddTimestamp(float InAudioCursor);
 
-	static void AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* World);
+	static void AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* InWorld);
+
+	static void AddTimestamp(class ARPPEventBase* InPluginTimestamp);
 
 	static void DeleteTimestamp(int32 InEventID);
 
 	static void SetPluginManager(AMySecondPluginManager* InMySecondPluginManager);
 
-	static void RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPluginManager);
+	static void RefreshRunSpeed(UWorld* InWorld, AMySecondPluginManager* InPluginManager);
+
+	static void RefreshRunSpeed();
 
 	static void ClearEverything();
+
+	static void TestFunction();
+
+	static void SetWorld(UWorld* InWorld);
+
+	static float WorldSpaceToAudioCursor(FVector InLocation, UWorld* InWorld);
+
+	static void SetRPPPluginManager(ARPPPluginManager* InRPPPluginManager);
+
+	static void HandleOnEventPlaced(AActor* InActor);
+
+	static void HandleOnEventRemoved(int32 InEventID);
+
 
 };

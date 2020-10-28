@@ -10,6 +10,9 @@
 
 static const FName MySecondPluginTabName("MySecondPlugin");
 
+DEFINE_LOG_CATEGORY(LogRPP);
+
+
 #define LOCTEXT_NAMESPACE "FMySecondPluginModule"
 
 void FMySecondPluginModule::StartupModule()

@@ -9,6 +9,8 @@
 #include "RPPWaveformCanvas.h"
 #include "RPPUtility.h"
 #include "RPPMain.h"
+#include "RPPGameModule/Public/RPPPluginManager.h"
+
 #include "MySecondPluginManager.h"
 
 
@@ -110,7 +112,7 @@ void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 
 	float Padding = 0;
 	float WindowLength = RPPMain->WindowLength;
-	float BorderUnitPerSecond = RPPMain->PluginManagerObject->RunningSpeed;
+	float BorderUnitPerSecond = RPPMain->RPPPluginManager->RunningSpeed;
 	float AudioDuration = RPPMain->AudioDuration;
 	float LineHeight = 200;
 
@@ -141,33 +143,27 @@ void SRPPWaveformCanvas::GetBeatGrid(float CurrentCursor)
 	//	//LastXCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex - 1] - (LowerBound)) * BorderUnitPerSecond;
 	//}
 
-	while ((URPPUtility::BeatRawArray[StartingIndex] < (LowerBound)) && (StartingIndex < URPPUtility::BeatRawArray.Num()))
+	if (URPPUtility::BeatRawArray.Num() > 0)
 	{
+		while ((URPPUtility::BeatRawArray[StartingIndex] < (LowerBound)) && (StartingIndex < URPPUtility::BeatRawArray.Num()))
+		{
 			StartingIndex++;
+		}
+
+
+
+		while ((StartingIndex < URPPUtility::BeatRawArray.Num()) && (URPPUtility::BeatRawArray[StartingIndex] < UpperBound))
+		{
+
+			float XTemp = (URPPUtility::BeatRawArray[StartingIndex] - LowerBound) * UnitPerSecond;
+
+			URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding));   //top point
+			URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding) + FVector2D(0, LineHeight)); //bottom point
+			StartingIndex++;
+		}
 	}
 
 
-
-	while ((StartingIndex < URPPUtility::BeatRawArray.Num()) && (URPPUtility::BeatRawArray[StartingIndex] < UpperBound))
-	{
-
-		float XTemp = (URPPUtility::BeatRawArray[StartingIndex] -LowerBound) * UnitPerSecond;
-
-
-		URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding));   //top point
-		URPPUtility::BeatDrawArray.Add(FVector2D(XTemp, Padding) + FVector2D(0, LineHeight)); //bottom point
-		StartingIndex++;
-
-
-
-		//old
-		//float XCord = LastXCord + (URPPUtility::BeatRawArray[StartingIndex] - URPPUtility::BeatRawArray[StartingIndex - 1]) * BorderUnitPerSecond;
-		//URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding));   //top point
-		//URPPUtility::BeatDrawArray.Add(FVector2D(XCord, Padding) + FVector2D(0, LineHeight)); //bottom point
-		//StartingIndex++;
-		//LastXCord = XCord;
-
-	}
 }
 
 /*

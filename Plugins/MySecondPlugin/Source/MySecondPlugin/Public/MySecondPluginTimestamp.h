@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PropertyEditor/Public/IDetailCustomization.h"
 #include "MySecondPluginTimestamp.generated.h"
 
 class USphereComponent;
@@ -24,9 +23,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* SphereMesh;
-
-	UPROPERTY(EditAnywhere)
-	USphereComponent* SphereComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<AActor>> SpawnedList;

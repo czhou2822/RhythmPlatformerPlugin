@@ -4,10 +4,16 @@
 
 #include "EditorViewportClient.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+
 
 #include "MySecondPluginTextRW.h"
 #include "MySecondPluginTimestamp.h"
 #include "MySecondPluginManager.h"
+
+#include "RPPGameModule/Public/RPPPluginManager.h"
+#include "RPPGameModule/Public/RPPEventBase.h"
+
 
 
 
@@ -27,6 +33,10 @@ AMySecondPluginManager* URPPUtility::MySecondPluginManager = nullptr;
 int32 URPPUtility::WidgetHeight = 0;
 
 int32 URPPUtility::WidgetWidth = 0;
+
+ARPPPluginManager* URPPUtility::RPPPluginManager = nullptr;
+
+UWorld* URPPUtility::World = nullptr;
 
 
 URPPUtility::URPPUtility()
@@ -123,15 +133,24 @@ void URPPUtility::RawDataArrayToRawDrawArray(int BucketSize)
 	float YOffset = WidgetHeight/2;
 
 	int InputArrayIndex = 0;
+	float AbsMax = 0;
 	int NumberOfBuckets = (DataRawArray.Num() - (DataRawArray.Num() % BucketSize)) / BucketSize;
-	float AbsMax = DataRawArray[0];
-	for (int i = 0; i < DataRawArray.Num(); i++)
+	if (DataRawArray.Num())
 	{
-		if (FMath::Abs(DataRawArray[i]) > AbsMax)
+		AbsMax = DataRawArray[0];
+		for (int i = 0; i < DataRawArray.Num(); i++)
 		{
-			AbsMax = DataRawArray[i];
+			if (FMath::Abs(DataRawArray[i]) > AbsMax)
+			{
+				AbsMax = DataRawArray[i];
+			}
 		}
 	}
+	else
+	{
+		return;
+	}
+
 
 	//float YScale = BorderHeight / (2 * AbsMax);
 
@@ -319,7 +338,7 @@ void URPPUtility::AddTimestamp(float InAudioCursor)
 
 }
 
-void URPPUtility::AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* World)
+void URPPUtility::AddTimestamp(ARPPEventBase* InPluginTimestamp)
 {
 	if (InPluginTimestamp)
 	{
@@ -331,7 +350,29 @@ void URPPUtility::AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp
 
 		FPlatformerEvent NewEvent;
 		NewEvent.EventUniqueID = InPluginTimestamp->GetUniqueID();
-		NewEvent.EventTime = WorldSpaceToAudioCursor(InPluginTimestamp->GetActorLocation(), World);
+		NewEvent.EventTime = WorldSpaceToAudioCursor(InPluginTimestamp->GetActorLocation(), URPPUtility::World);
+
+		UE_LOG(LogTemp, Warning, TEXT("EventTime: %s"), *FString::SanitizeFloat(NewEvent.EventTime, 2));
+
+		MySecondPluginTextRW->AddEvent(NewEvent);
+		return;
+
+	}
+}
+
+void URPPUtility::AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* InWorld)
+{
+	if (InPluginTimestamp)
+	{
+		if (InPluginTimestamp->GetActorLocation().IsZero())
+		{
+			return;
+		}
+
+
+		FPlatformerEvent NewEvent;
+		NewEvent.EventUniqueID = InPluginTimestamp->GetUniqueID();
+		NewEvent.EventTime = WorldSpaceToAudioCursor(InPluginTimestamp->GetActorLocation(), URPPUtility::World);
 
 		UE_LOG(LogTemp, Warning, TEXT("EventTime: %s"), *FString::SanitizeFloat(NewEvent.EventTime, 2));
 
@@ -346,11 +387,11 @@ void URPPUtility::DeleteTimestamp(int32 InEventID)
 	MySecondPluginTextRW->DeleteEvent(InEventID);
 }
 
-float URPPUtility::WorldSpaceToAudioCursor(FVector InLocation, UWorld* World)
+float URPPUtility::WorldSpaceToAudioCursor(FVector InLocation, UWorld* InWorld)
 {
 
 	TArray<AActor*> foundManager;
-	UGameplayStatics::GetAllActorsOfClass(World, AMySecondPluginManager::StaticClass(), foundManager);
+	UGameplayStatics::GetAllActorsOfClass(URPPUtility::World, AMySecondPluginManager::StaticClass(), foundManager);
 
 	if (foundManager.Num() == 1)
 	{
@@ -377,7 +418,7 @@ void URPPUtility::SetPluginManager(AMySecondPluginManager* InMySecondPluginManag
 	MySecondPluginManager = InMySecondPluginManager;
 }
 
-void URPPUtility::RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPluginManager)
+void URPPUtility::RefreshRunSpeed(UWorld* InWorld, AMySecondPluginManager* InPluginManager)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %s. "), *FString::SanitizeFloat(PluginManagerObject->RunningSpeed));
 
@@ -412,14 +453,52 @@ void URPPUtility::RefreshRunSpeed(UWorld* World, AMySecondPluginManager* InPlugi
 			}
 			if (!bIsActorFound)
 			{
-				AMySecondPluginTimestamp* newTimeStamp = World->
+				AMySecondPluginTimestamp* newTimeStamp = URPPUtility::World->
 					SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
 			}
 		}
 	}
 
+}
+
+void URPPUtility::RefreshRunSpeed()
+{
+	if (URPPUtility::World && URPPUtility::RPPPluginManager)
+	{
+		TSubclassOf<ARPPEventBase> classToFind;
+		classToFind = ARPPEventBase::StaticClass();
+		TArray<AActor*> FoundMarkers;
+		UGameplayStatics::GetAllActorsOfClass(World, classToFind, FoundMarkers);
 
 
+		//for (auto& TmpEvent : MySecondPluginTextRW->EventMemo)
+		//{
+
+		//	FActorSpawnParameters SpawnParms;
+		//	FVector SpawnLocation = FVector(TmpEvent.Value.EventTime * URPPUtility::RPPPluginManager->RunningSpeed, 0, 0);
+
+		//	bool bIsActorFound = false;
+		FVector SpawnLocation = FVector(0, 0, 0);
+		for (AActor* SingleActor : FoundMarkers)
+		{
+			ARPPEventBase* EventTemp = Cast<ARPPEventBase>(SingleActor);
+
+			if (EventTemp)
+			{
+				SpawnLocation.X = EventTemp->AudioLocation * URPPUtility::RPPPluginManager->RunningSpeed;
+				SpawnLocation.Z = SingleActor->GetActorLocation().Z;
+
+				SingleActor->SetActorLocation(SpawnLocation);
+			}
+				
+		}
+			//we want to ignore ghost actors
+			//if (!bIsActorFound)
+			//{
+			//	AMySecondPluginTimestamp* newTimeStamp = URPPUtility::World->
+			//		SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
+			//}
+	}
 }
 
 void URPPUtility::ClearEverything()
@@ -437,5 +516,45 @@ void URPPUtility::ClearEverything()
 
 	URPPUtility::MySecondPluginManager = nullptr;
 
+
+}
+
+void URPPUtility::TestFunction()
+{
+	UE_LOG(LogTemp, Warning, TEXT("rpputil testfunction called"));
+}
+
+void URPPUtility::SetWorld(UWorld* InWorld)
+{
+	if (InWorld)
+	{
+		URPPUtility::World = InWorld;
+	}
+}
+
+void URPPUtility::SetRPPPluginManager(ARPPPluginManager* InRPPPluginManager)
+{
+	if (InRPPPluginManager)
+	{
+		URPPUtility::RPPPluginManager = InRPPPluginManager;
+		InRPPPluginManager->OnRPPEventPlaced.AddStatic(&URPPUtility::HandleOnEventPlaced);
+		InRPPPluginManager->OnRPPEventRemoved.AddStatic(&URPPUtility::DeleteTimestamp);
+	}
+}
+
+void URPPUtility::HandleOnEventPlaced(AActor* InActor)
+{
+	if (InActor)
+	{
+		ARPPEventBase* NewEventBase = Cast< ARPPEventBase>(InActor);
+		if (NewEventBase)
+		{
+			AddTimestamp(NewEventBase);
+		}
+	}
+}
+
+void URPPUtility::HandleOnEventRemoved(int32 InEventID)
+{
 
 }

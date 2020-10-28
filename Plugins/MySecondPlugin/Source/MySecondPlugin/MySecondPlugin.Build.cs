@@ -29,14 +29,14 @@ public class MySecondPlugin : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Projects",
 				"InputCore",
-				"UnrealEd",
+//				"UnrealEd",
 				"LevelEditor",
 				"CoreUObject",
 				"Engine",
@@ -45,13 +45,18 @@ public class MySecondPlugin : ModuleRules
 				"Slate",
 				"SlateCore",
 				"PropertyEditor",
-				"EditorStyle"
+				"EditorStyle",
+				"RPPGameModule"
 		
 				// ... add private dependencies that you statically link with here ...	
-			}
-			);
-		
-		
+			});
+
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new[] {"UnrealEd"});
+		};
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{

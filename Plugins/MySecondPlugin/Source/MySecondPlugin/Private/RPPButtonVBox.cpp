@@ -170,7 +170,7 @@ FReply SRPPButtonVBox::RefreshRunningSpeed()
 {
 	if (RPPMain)
 	{
-		URPPUtility::RefreshRunSpeed(RPPMain->EditorViewportClient->GetWorld(), RPPMain->PluginManagerObject);
+		URPPUtility::RefreshRunSpeed();
 		return FReply::Handled();
 	}
 	return FReply::Unhandled();

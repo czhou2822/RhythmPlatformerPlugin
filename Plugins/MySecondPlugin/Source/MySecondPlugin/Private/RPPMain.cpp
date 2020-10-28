@@ -9,12 +9,17 @@
 #include "Editor.h"
 
 //user include
+#include "RPPGameModule/Public/RPPEventBase.h"
+#include "RPPGameModule/Public/RPPPluginManager.h"
+#include "MySecondPlugin.h"
 #include "RPPUtility.h"
 #include "MySecondPluginManager.h"
 
 
 
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
 
 
 void SRPPMain::Construct(const FArguments& InArgs)
@@ -64,30 +69,36 @@ void SRPPMain::Tick(const FGeometry& AllottedGeometry, const double InCurrentTim
 {
 	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 
-
+	if (bIsValidated)
 	{
-		if (EditorViewportClient->GetOrthoZoom() != OrthoZoom)   //zoom happened
+
+		//process zoom
 		{
-			OrthoZoom = EditorViewportClient->GetOrthoZoom();
-			ProcessZoom();                                       //recalculate zoom and display
+			if (EditorViewportClient->GetOrthoZoom() != OrthoZoom)   //zoom happened
+			{
+				OrthoZoom = EditorViewportClient->GetOrthoZoom();
+				ProcessZoom();                                       //recalculate zoom and display
+			}
+		}
+
+		//update look at
+		{
+			if ((AudioComponent->bIsPaused) && (AudioPercentage <= 1))
+			{
+				AudioCursor = (EditorViewportClient->GetViewLocation().X - CameraStartingLocation.X) / RPPPluginManager->RunningSpeed;
+				AudioPercentage = AudioCursor / AudioDuration;
+			}
+
+			SnaplineCursor = (AudioPercentage * URPPUtility::DataDrawArray.Num());
+			//UE_LOG(LogTemp, Warning, TEXT("ViewLocationX: %.02f"), EditorViewportClient->GetViewLocation().X);
+			//UE_LOG(LogTemp, Warning, TEXT("AudioCursor: %.02f"), AudioCursor);
+			//UE_LOG(LogTemp, Warning, TEXT("AudioPercentage: %.02f"), AudioPercentage);
+			//UE_LOG(LogTemp, Warning, TEXT("SnaplineCursor: %i"), SnaplineCursor);
+			UpdateCamaraLookAt();
 		}
 	}
 
-	//update look at
-	{
-		if ((AudioComponent->bIsPaused) && (AudioPercentage <= 1))
-		{
-			AudioCursor = (EditorViewportClient->GetViewLocation().X - CameraStartingLocation.X) / PluginManagerObject->RunningSpeed;
-			AudioPercentage = AudioCursor / AudioDuration;
-		}
 
-		SnaplineCursor = (AudioPercentage * URPPUtility::DataDrawArray.Num());
-		//UE_LOG(LogTemp, Warning, TEXT("ViewLocationX: %.02f"), EditorViewportClient->GetViewLocation().X);
-		//UE_LOG(LogTemp, Warning, TEXT("AudioCursor: %.02f"), AudioCursor);
-		//UE_LOG(LogTemp, Warning, TEXT("AudioPercentage: %.02f"), AudioPercentage);
-		//UE_LOG(LogTemp, Warning, TEXT("SnaplineCursor: %i"), SnaplineCursor);
-		UpdateCamaraLookAt();
-	}
 
 
 
@@ -100,7 +111,7 @@ void SRPPMain::UpdateCamaraLookAt()
 	{
 		FVector newLookAt = EditorViewportClient->GetViewLocation();
 
-		float Delta = AudioCursor * PluginManagerObject->RunningSpeed;
+		float Delta = AudioCursor * RPPPluginManager->RunningSpeed;
 
 		URPPUtility::RawDrawArrayToDrawArray(SnaplineCursor, NUMBER_OF_LINES_IN_WINDOW + SnaplineCursor);
 
@@ -148,10 +159,10 @@ void SRPPMain::ChangePlaybackSpeed(float InFloat)
 
 void SRPPMain::SetCurrentAsBeatStartingTime()
 {
-	if (PluginManagerObject)
+	if (RPPPluginManager)
 	{
-		PluginManagerObject->BeatStartingTime = AudioCursor;
-		URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, AudioDuration, PluginManagerObject->BeatStartingTime);
+		RPPPluginManager->BeatStartingTime = AudioCursor;
+		URPPUtility::CalculateRawBeatArray(RPPPluginManager->BPM, AudioDuration, RPPPluginManager->BeatStartingTime);
 	}
 }
 
@@ -169,35 +180,60 @@ void SRPPMain::Initilization()
 		CameraStartingLocation = EditorViewportClient->GetViewLocation();   //get default location of the camera, mainly for y and z as x will be override by tick shortly
 
 		FEditorDelegates::OnEditorCameraMoved.AddSP(this, &SRPPMain::OnEditorCameraMoved);
+//		FEditorDelegates::OnNewActorsDropped.AddSP(this, &SRPPMain::HandleOnNewActorsDropped);
 
 		UWorld* World = EditorViewportClient->GetWorld();
 		if (World)
 		{
+			//TArray<AActor*> foundManager;
+			//UGameplayStatics::GetAllActorsOfClass(World, AMySecondPluginManager::StaticClass(), foundManager);
+
+			//if (foundManager.Num() == 1)
+			//{
+			//	PluginManagerObject = Cast<AMySecondPluginManager>(foundManager[0]);
+			//	//plugin manager related settings 
+			//	if (PluginManagerObject)
+			//	{
+			//		SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound;
+			//		if (SoundWave)
+			//		{
+			//			AudioDuration = SoundWave->Duration;
+			//			AudioComponent = PluginManagerObject->PluginAudioPlayer;
+			//			AudioComponent->SetPaused(true);
+			//			AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
+			//			ProcessSoundWave();
+			//		}
+			//		ResetViewport();
+			//	}
+			//}
+
+
+
 			TArray<AActor*> foundManager;
-			UGameplayStatics::GetAllActorsOfClass(World, AMySecondPluginManager::StaticClass(), foundManager);
+			UGameplayStatics::GetAllActorsOfClass(World, ARPPPluginManager::StaticClass(), foundManager);
 
 			if (foundManager.Num() == 1)
 			{
-				PluginManagerObject = Cast<AMySecondPluginManager>(foundManager[0]);
+				RPPPluginManager = Cast<ARPPPluginManager>(foundManager[0]);
 				//plugin manager related settings 
-				if (PluginManagerObject)
+				if (RPPPluginManager)
 				{
-					SoundWave = (USoundWave*)PluginManagerObject->PluginAudioPlayer->Sound;
-					if (SoundWave)
+					if (ValidatePluginManager(RPPPluginManager))
 					{
-						AudioDuration = SoundWave->Duration;
-						AudioComponent = PluginManagerObject->PluginAudioPlayer;
-						AudioComponent->SetPaused(true);
-						AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
-						ProcessSoundWave();
-
-
+						SoundWave = (USoundWave*)RPPPluginManager->AudioTrack;
+						if (SoundWave)
+						{
+							AudioDuration = SoundWave->Duration;
+							AudioComponent = RPPPluginManager->PluginAudioPlayer;
+							AudioComponent->SetPaused(true);
+							AudioComponent->OnAudioPlaybackPercentNative.AddSP(this, &SRPPMain::HandleOnAudioPlaybackPercentNative);
+							URPPUtility::SetWorld(World);
+							ProcessSoundWave();
+						}
+						ResetViewport();
 					}
-					ResetViewport();
-
 				}
 			}
-
 		}
 	}
 }
@@ -208,9 +244,11 @@ void SRPPMain::ProcessSoundWave()
 	{
 		
 		URPPUtility::SetDataRawArray(SoundWave);
-		URPPUtility::CalculateRawBeatArray(PluginManagerObject->BPM, SoundWave->Duration, PluginManagerObject->BeatStartingTime);
+		URPPUtility::CalculateRawBeatArray(RPPPluginManager->BPM, SoundWave->Duration, RPPPluginManager->BeatStartingTime);
 		URPPUtility::SetEditorViewportClient(EditorViewportClient);
-		URPPUtility::SetPluginManager(PluginManagerObject);
+//		URPPUtility::SetPluginManager(PluginManagerObject);
+
+		URPPUtility::SetRPPPluginManager(RPPPluginManager);
 
 		ProcessZoom();
 
@@ -252,7 +290,7 @@ int SRPPMain::GetZoomFactor()
 			SceneView->DeprojectFVector2D(FVector2D(Width, Height / 2), WorldRPosTemp, WorldDirectTemp);
 			//UE_LOG(LogTemp, Warning, TEXT("Pos: %s, Dir: %s"), *WorldRPosTemp.ToString(), *WorldDirectTemp.ToString());
 
-			WindowLength = (FMath::Abs(WorldRPosTemp.X - WorldLPosTemp.X)) / PluginManagerObject->RunningSpeed;
+			WindowLength = (FMath::Abs(WorldRPosTemp.X - WorldLPosTemp.X)) / RPPPluginManager->RunningSpeed;
 
 			ZoomFactor = WindowLength / (float)SoundWave->Duration * ((float)URPPUtility::DataRawArray.Num()) / NUMBER_OF_LINES_IN_WINDOW;
 
@@ -280,6 +318,55 @@ void SRPPMain::OnEditorCameraMoved(const FVector& InFVector, const FRotator& InR
 
 }
 
+void SRPPMain::HandleOnNewActorsDropped(const TArray<UObject*>& InUObjects, const TArray<AActor*>& InAActors)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnNewActorsDropped event"));
+
+	for (auto& Tmp : InAActors)
+	{
+		ARPPEventBase* NewEventBase = Cast<ARPPEventBase>(Tmp);
+		if (NewEventBase)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Catch an event actor"));
+		}
+	}
+
+
+}
+
+void SRPPMain::HandleOnNewRPPEventPlaced(int32 InRPPID)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnNewRPPEventPlaced: %i"), InRPPID);
+
+}
+
+void SRPPMain::HandleOnNewRPPEventRemoved(int32 InRPPID)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnNewRPPEventRemoved: %i"), InRPPID);
+}
+
+bool SRPPMain::ValidatePluginManager(ARPPPluginManager* InRPPPluginManager)
+{
+	if (InRPPPluginManager)
+	{
+		if (!InRPPPluginManager->AudioTrack)
+		{
+			UE_LOG(LogRPP, Error, TEXT("Audio Track NULL!"))
+			return false;
+		}
+		if (!InRPPPluginManager->RunningSpeed)
+		{
+			UE_LOG(LogRPP, Warning, TEXT("Running Speed can't be 0."))
+
+			return false;
+		}
+		bIsValidated = true;
+		return true;
+
+	}
+	return false;
+}
+
 void SRPPMain::ResetViewport()
 {
 	AudioCursor = 0.f;
@@ -288,7 +375,7 @@ void SRPPMain::ResetViewport()
 	{
 		EditorViewportClient->SetViewportType(ELevelViewportType::LVT_OrthoXZ);
 		EditorViewportClient->SetViewMode(EViewModeIndex::VMI_Lit);
-		CameraStartingLocation = FVector(PluginManagerObject->GetActorLocation().X, CameraStartingLocation.Y, CameraStartingLocation.Z);
+		CameraStartingLocation = FVector(RPPPluginManager->GetActorLocation().X, CameraStartingLocation.Y, CameraStartingLocation.Z);
 		EditorViewportClient->SetViewLocation(CameraStartingLocation);
 	}
 }
