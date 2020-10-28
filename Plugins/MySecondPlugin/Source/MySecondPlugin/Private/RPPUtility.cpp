@@ -28,7 +28,7 @@ UMySecondPluginTextRW* URPPUtility::MySecondPluginTextRW = nullptr;
 
 FEditorViewportClient* URPPUtility::EditorViewportClient = nullptr;
 
-AMySecondPluginManager* URPPUtility::MySecondPluginManager = nullptr;
+//AMySecondPluginManager* URPPUtility::MySecondPluginManager = nullptr;
 
 int32 URPPUtility::WidgetHeight = 0;
 
@@ -323,20 +323,20 @@ void URPPUtility::SaveLevel()
 	MySecondPluginTextRW->SaveLevelInfo("test.txt");
 }
 
-void URPPUtility::AddTimestamp(float InAudioCursor)
-{
-	if (EditorViewportClient)
-	{
-		AMySecondPluginTimestamp* newTimeStamp = EditorViewportClient->GetWorld()->SpawnActor<AMySecondPluginTimestamp>(FVector(EditorViewportClient->GetViewLocation().X, 0, EditorViewportClient->GetViewLocation().Z), FRotator::ZeroRotator);
-
-		FPlatformerEvent NewEvent;
-		NewEvent.EventUniqueID = newTimeStamp->GetUniqueID();
-		NewEvent.EventTime = InAudioCursor;
-
-		MySecondPluginTextRW->AddEvent(NewEvent);
-	}
-
-}
+//void URPPUtility::AddTimestamp(float InAudioCursor)
+//{
+//	if (EditorViewportClient)
+//	{
+//		AMySecondPluginTimestamp* newTimeStamp = EditorViewportClient->GetWorld()->SpawnActor<AMySecondPluginTimestamp>(FVector(EditorViewportClient->GetViewLocation().X, 0, EditorViewportClient->GetViewLocation().Z), FRotator::ZeroRotator);
+//
+//		FPlatformerEvent NewEvent;
+//		NewEvent.EventUniqueID = newTimeStamp->GetUniqueID();
+//		NewEvent.EventTime = InAudioCursor;
+//
+//		MySecondPluginTextRW->AddEvent(NewEvent);
+//	}
+//
+//}
 
 void URPPUtility::AddTimestamp(ARPPEventBase* InPluginTimestamp)
 {
@@ -360,27 +360,27 @@ void URPPUtility::AddTimestamp(ARPPEventBase* InPluginTimestamp)
 	}
 }
 
-void URPPUtility::AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* InWorld)
-{
-	if (InPluginTimestamp)
-	{
-		if (InPluginTimestamp->GetActorLocation().IsZero())
-		{
-			return;
-		}
-
-
-		FPlatformerEvent NewEvent;
-		NewEvent.EventUniqueID = InPluginTimestamp->GetUniqueID();
-		NewEvent.EventTime = WorldSpaceToAudioCursor(InPluginTimestamp->GetActorLocation(), URPPUtility::World);
-
-		UE_LOG(LogTemp, Warning, TEXT("EventTime: %s"), *FString::SanitizeFloat(NewEvent.EventTime, 2));
-
-		MySecondPluginTextRW->AddEvent(NewEvent);
-		return;
-
-	}
-}
+//void URPPUtility::AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* InWorld)
+//{
+//	if (InPluginTimestamp)
+//	{
+//		if (InPluginTimestamp->GetActorLocation().IsZero())
+//		{
+//			return;
+//		}
+//
+//
+//		FPlatformerEvent NewEvent;
+//		NewEvent.EventUniqueID = InPluginTimestamp->GetUniqueID();
+//		NewEvent.EventTime = WorldSpaceToAudioCursor(InPluginTimestamp->GetActorLocation(), URPPUtility::World);
+//
+//		UE_LOG(LogTemp, Warning, TEXT("EventTime: %s"), *FString::SanitizeFloat(NewEvent.EventTime, 2));
+//
+//		MySecondPluginTextRW->AddEvent(NewEvent);
+//		return;
+//
+//	}
+//}
 
 void URPPUtility::DeleteTimestamp(int32 InEventID)
 {
@@ -390,19 +390,11 @@ void URPPUtility::DeleteTimestamp(int32 InEventID)
 float URPPUtility::WorldSpaceToAudioCursor(FVector InLocation, UWorld* InWorld)
 {
 
-	TArray<AActor*> foundManager;
-	UGameplayStatics::GetAllActorsOfClass(URPPUtility::World, AMySecondPluginManager::StaticClass(), foundManager);
-
-	if (foundManager.Num() == 1)
+	if (URPPUtility::RPPPluginManager)
 	{
-		MySecondPluginManager = Cast<AMySecondPluginManager>(foundManager[0]);
-	}
+		float Delta = InLocation.X - URPPUtility::RPPPluginManager->GetActorLocation().X;
 
-	if (MySecondPluginManager)
-	{
-		float Delta = InLocation.X - MySecondPluginManager->GetActorLocation().X;
-
-		float AudioCursor = Delta / MySecondPluginManager->RunningSpeed;
+		float AudioCursor = Delta / URPPUtility::RPPPluginManager->RunningSpeed;
 
 		UE_LOG(LogTemp, Warning, TEXT("Delta: %s, AudioCursor: %s"), *FString::SanitizeFloat(Delta, 2), *FString::SanitizeFloat(AudioCursor, 2));
 
@@ -413,53 +405,53 @@ float URPPUtility::WorldSpaceToAudioCursor(FVector InLocation, UWorld* InWorld)
 
 }
 
-void URPPUtility::SetPluginManager(AMySecondPluginManager* InMySecondPluginManager)
-{
-	MySecondPluginManager = InMySecondPluginManager;
-}
-
-void URPPUtility::RefreshRunSpeed(UWorld* InWorld, AMySecondPluginManager* InPluginManager)
-{
-	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %s. "), *FString::SanitizeFloat(PluginManagerObject->RunningSpeed));
-
-	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %d. "), MySecondPluginTextRW->EventMemo.Num());
-
-	if (World)
-	{
-		TSubclassOf<AMySecondPluginTimestamp> classToFind;
-		classToFind = AMySecondPluginTimestamp::StaticClass();
-		TArray<AActor*> FoundMarkers;
-		UGameplayStatics::GetAllActorsOfClass(World, classToFind, FoundMarkers);
-
-
-		for (auto& TmpEvent : MySecondPluginTextRW->EventMemo)
-		{
-
-			FActorSpawnParameters SpawnParms;
-			FVector SpawnLocation = FVector(TmpEvent.Value.EventTime * InPluginManager->RunningSpeed, 0, 0);
-
-			bool bIsActorFound = false;
-			for (AActor* SingleActor : FoundMarkers)
-			{
-				if (SingleActor->GetUniqueID() == TmpEvent.Value.EventUniqueID)
-				{
-					SpawnLocation.Z = SingleActor->GetActorLocation().Z;
-
-					SingleActor->SetActorLocation(SpawnLocation);
-					FoundMarkers.Remove(SingleActor);
-					bIsActorFound = true;
-					break;
-				}
-			}
-			if (!bIsActorFound)
-			{
-				AMySecondPluginTimestamp* newTimeStamp = URPPUtility::World->
-					SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
-			}
-		}
-	}
-
-}
+//void URPPUtility::SetPluginManager(AMySecondPluginManager* InMySecondPluginManager)
+//{
+//	MySecondPluginManager = InMySecondPluginManager;
+//}
+//
+//void URPPUtility::RefreshRunSpeed(UWorld* InWorld, AMySecondPluginManager* InPluginManager)
+//{
+//	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %s. "), *FString::SanitizeFloat(PluginManagerObject->RunningSpeed));
+//
+//	//UE_LOG(LogTemp, Warning, TEXT("Running Speed: %d. "), MySecondPluginTextRW->EventMemo.Num());
+//
+//	if (World)
+//	{
+//		TSubclassOf<AMySecondPluginTimestamp> classToFind;
+//		classToFind = AMySecondPluginTimestamp::StaticClass();
+//		TArray<AActor*> FoundMarkers;
+//		UGameplayStatics::GetAllActorsOfClass(World, classToFind, FoundMarkers);
+//
+//
+//		for (auto& TmpEvent : MySecondPluginTextRW->EventMemo)
+//		{
+//
+//			FActorSpawnParameters SpawnParms;
+//			FVector SpawnLocation = FVector(TmpEvent.Value.EventTime * InPluginManager->RunningSpeed, 0, 0);
+//
+//			bool bIsActorFound = false;
+//			for (AActor* SingleActor : FoundMarkers)
+//			{
+//				if (SingleActor->GetUniqueID() == TmpEvent.Value.EventUniqueID)
+//				{
+//					SpawnLocation.Z = SingleActor->GetActorLocation().Z;
+//
+//					SingleActor->SetActorLocation(SpawnLocation);
+//					FoundMarkers.Remove(SingleActor);
+//					bIsActorFound = true;
+//					break;
+//				}
+//			}
+//			if (!bIsActorFound)
+//			{
+//				AMySecondPluginTimestamp* newTimeStamp = URPPUtility::World->
+//					SpawnActor<AMySecondPluginTimestamp>(SpawnLocation, FRotator::ZeroRotator, SpawnParms);
+//			}
+//		}
+//	}
+//
+//}
 
 void URPPUtility::RefreshRunSpeed()
 {
@@ -514,7 +506,7 @@ void URPPUtility::ClearEverything()
 
 	URPPUtility::EditorViewportClient = nullptr;
 
-	URPPUtility::MySecondPluginManager = nullptr;
+	URPPUtility::RPPPluginManager = nullptr;
 
 
 }

@@ -42,7 +42,7 @@ public:
 
 	static class UMySecondPluginTextRW* MySecondPluginTextRW;
 
-	static class AMySecondPluginManager* MySecondPluginManager;
+//	static class AMySecondPluginManager* MySecondPluginManager;
 
 	static class ARPPPluginManager* RPPPluginManager;
 
@@ -84,17 +84,17 @@ public:
 
     static void SaveLevel();
 
-	static void AddTimestamp(float InAudioCursor);
+//	static void AddTimestamp(float InAudioCursor);
 
-	static void AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* InWorld);
+//	static void AddTimestamp(class AMySecondPluginTimestamp* InPluginTimestamp, UWorld* InWorld);
 
 	static void AddTimestamp(class ARPPEventBase* InPluginTimestamp);
 
 	static void DeleteTimestamp(int32 InEventID);
 
-	static void SetPluginManager(AMySecondPluginManager* InMySecondPluginManager);
+//	static void SetPluginManager(AMySecondPluginManager* InMySecondPluginManager);
 
-	static void RefreshRunSpeed(UWorld* InWorld, AMySecondPluginManager* InPluginManager);
+//	static void RefreshRunSpeed(UWorld* InWorld, AMySecondPluginManager* InPluginManager);
 
 	static void RefreshRunSpeed();
 

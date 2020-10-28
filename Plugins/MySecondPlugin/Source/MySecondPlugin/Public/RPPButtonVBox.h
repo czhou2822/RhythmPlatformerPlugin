@@ -35,7 +35,7 @@ private:
 
 	FReply ReloadWave();
 
-	FReply MarkTimeStamp();
+	//FReply MarkTimeStamp();
 
 	//FReply SetStartingPosition();
 

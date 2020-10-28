@@ -19,6 +19,12 @@ public:
 
 	float AudioLocation = 0.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<AActor>> SpawnedList;
+
+	UPROPERTY(EditAnywhere)
+	TArray<int32> SpawnPercentage;
+
 	// Sets default values for this actor's properties
 	ARPPEventBase();
 
@@ -36,8 +42,11 @@ protected:
 
 	virtual void FindPluginManager();
 
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+public:	
+	UFUNCTION()
+	void DecideSpawnActor();
 
 };

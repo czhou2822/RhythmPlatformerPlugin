@@ -143,15 +143,15 @@ FReply SRPPButtonVBox::ReloadWave()
 	return FReply::Unhandled();
 }
 
-FReply SRPPButtonVBox::MarkTimeStamp()
-{
-	if (RPPMain)
-	{
-		URPPUtility::AddTimestamp(RPPMain->AudioCursor);
-		return FReply::Handled();
-	}
-	return FReply::Unhandled();
-}
+//FReply SRPPButtonVBox::MarkTimeStamp()
+//{
+//	if (RPPMain)
+//	{
+//		URPPUtility::AddTimestamp(RPPMain->AudioCursor);
+//		return FReply::Handled();
+//	}
+//	return FReply::Unhandled();
+//}
 
 FReply SRPPButtonVBox::LoadLevel()
 {

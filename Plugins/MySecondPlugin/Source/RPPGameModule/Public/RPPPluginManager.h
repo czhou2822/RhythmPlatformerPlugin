@@ -23,6 +23,7 @@ public:
 
 	FOnRPPEventRemoved OnRPPEventRemoved;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "RPPPlugin")
 	class UAudioComponent* PluginAudioPlayer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RPPPlugin")

@@ -36,7 +36,7 @@ public class MySecondPlugin : ModuleRules
 			{
 				"Projects",
 				"InputCore",
-//				"UnrealEd",
+				"UnrealEd",
 				"LevelEditor",
 				"CoreUObject",
 				"Engine",
@@ -51,10 +51,10 @@ public class MySecondPlugin : ModuleRules
 				// ... add private dependencies that you statically link with here ...	
 			});
 
-		if (Target.bBuildEditor)
-		{
-			PrivateDependencyModuleNames.AddRange(new[] {"UnrealEd"});
-		};
+		//if (Target.bBuildEditor)
+		//{
+		//	PrivateDependencyModuleNames.AddRange(new[] {"UnrealEd"});
+		//};
 
 
 		DynamicallyLoadedModuleNames.AddRange(

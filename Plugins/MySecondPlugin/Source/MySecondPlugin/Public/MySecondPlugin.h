@@ -20,7 +20,7 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	TSharedPtr<SMyCompoundWidget> MyCompoundWidget;
+//	TSharedPtr<SMyCompoundWidget> MyCompoundWidget;
 	TSharedPtr<SRPPMain> RPPMain;
 
 	/** This function will be bound to Command. */
